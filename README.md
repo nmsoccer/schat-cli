@@ -1,0 +1,2 @@
+# schat-cli
+schat client
