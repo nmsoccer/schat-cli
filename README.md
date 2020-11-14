@@ -1,2 +1,2 @@
-# schat-cli
+# schat-client
 schat client
