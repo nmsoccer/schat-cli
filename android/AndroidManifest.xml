@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.app.schat">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher_round"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/net_sec"
+        android:roundIcon="@drawable/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
+        <activity
+            android:name=".SplashActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="Splash" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatMain" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ChatDetailActivity"
+            android:label="聊天记录"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatDetail" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GroundActivity"
+            android:label="广场"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatGround" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GroupSnapActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="GroupSnap" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GroupDetailActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="GroupDetail" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="登陆"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatLogin" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".RegActivity"
+            android:label="注册"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatReg" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SpaceActivity"
+            android:label="个人"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ChatPersonal" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".UserInfoActivity"
+            android:label="资料"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="UserInfo" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".UserSelfActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="UserSelf" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MasterGroupActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="MasterGroup" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".CreateGroupActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="CreateGroup" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MessageActivity"
+            android:label="信息"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="NewMessage" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SysSetActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="SysSet" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AboutActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="About" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

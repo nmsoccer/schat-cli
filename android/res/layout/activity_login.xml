@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/bg_body_list_background"
+    android:orientation="vertical" >
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="200dp"
+			android:background="@color/bg_white">
+        
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_launcher_round"
+            />
+		</RelativeLayout>
+        
+        
+	    <RelativeLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="20dp">
+	        
+	        <EditText
+	            android:id="@+id/login_user"
+	            android:inputType="text"
+	            android:maxLength="32"
+	            android:layout_width="250dp"
+	        	android:layout_height="30dp"
+	        	android:layout_centerHorizontal="true"
+	        	android:hint="请输入用户名"
+				android:paddingLeft="2dp"
+	        	android:background="@drawable/shape_blue_stroke"
+	        	android:textSize="12sp"
+				android:textColorHint="@color/bg_main_head_font_body"
+				android:textColor="@color/bg_black" />
+
+			<ImageView
+				android:layout_width="25dp"
+				android:layout_height="25dp"
+				android:background="@drawable/plus"
+				android:layout_toRightOf="@id/login_user"
+				android:layout_marginLeft="10dp"
+				android:layout_centerVertical="true"
+				android:id="@+id/login_reg"
+				android:onClick="onClickReg"
+				/>
+	        
+	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="30dp"
+	        android:layout_marginTop="10dp"
+	        android:orientation="horizontal"
+	        android:gravity="center_horizontal">
+	        
+	        
+	        <EditText
+	            android:id="@+id/login_pass"
+	            android:maxLength="12"
+	            android:inputType="textPassword"
+	            android:layout_width="250dp"
+	        	android:layout_height="30dp"
+	        	android:hint="请输入密码"
+				android:paddingLeft="2dp"
+				android:background="@drawable/shape_blue_stroke"
+	        	android:textSize="12sp"
+	        	android:layout_centerInParent="true"
+				android:textColorHint="@color/bg_main_head_font_body"
+				android:textColor="@color/bg_black"/>
+	        
+		</RelativeLayout>
+	    
+	    <TextView
+	     	android:layout_width="fill_parent"
+	     	android:layout_marginTop="5dp"
+	     	android:id="@+id/login_saved_passwd_title"
+	       	android:layout_height="wrap_content"
+	       	android:textSize="12sp"
+	       	android:visibility="gone"
+	       	android:gravity="center_horizontal"      
+	       	android:text="保存密码"/>
+
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true">
+
+
+	    <Button
+	        android:id="@+id/login_submit"
+	        android:gravity="center"
+	        android:textColor="@color/bg_white"
+	        android:layout_width="fill_parent"
+	        android:layout_height="40dp"
+	        android:onClick="onClick"
+	        android:background="@drawable/select_blue_gray"
+	        android:textSize="10sp"
+	        android:text="登陆" />
+	    
+	     <ImageView
+			android:visibility="gone"
+	        android:layout_width="fill_parent"
+	        android:layout_height="1dp"
+	        android:background="@drawable/line" 
+	        />
+	    
+	    <Button
+			android:visibility="gone"
+	        android:gravity="center"	        
+	        android:textColor="@color/bg_white"
+	        android:layout_width="fill_parent"
+			android:layout_marginTop="5dp"
+	        android:layout_height="40dp"
+	        android:background="@drawable/select_orange_gray"
+			android:textSize="10sp"
+	        android:text="注册" />
+    </LinearLayout>
+    
+
+</RelativeLayout>

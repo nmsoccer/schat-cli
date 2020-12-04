@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/send_dialog_title"
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:textSize="18sp"      
+        android:textColor="@android:color/white"
+        android:background="@null"/>
+    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="1dp"
+	        android:background="@color/bg_midnight_blue" />
+    
+    <FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<EditText
+			android:id="@+id/send_dialog_content"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="请输入发送内容，不超过120字"
+			android:gravity="top"
+			android:maxLength="80"
+			android:lines="12"
+			android:textColor="@color/bg_black"
+			android:textSize="15sp"
+			android:background="@null"/>
+		<ImageView
+			android:visibility="gone"
+			android:layout_width="300dp"
+			android:layout_height="200dp"
+			android:background="@color/bg_white"
+			android:id="@+id/send_dialog_iv_content"/>
+	</FrameLayout>
+
+
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="30dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">       
+
+		<Button android:id="@+id/send_dialog_ok"       
+		    android:layout_width="fill_parent"  
+		    android:layout_height="match_parent"
+		    android:gravity="center"
+		    android:textSize="12sp"
+		    android:textColor="@color/bg_midnight_blue"
+		    android:text="发送"
+		    android:background="@drawable/select_send_button"/>
+	</LinearLayout>
+
+	<ImageView
+		android:layout_marginTop="10dp"
+		android:id="@+id/iv_send_dialog_more"
+		android:layout_width="25dp"
+		android:layout_height="25dp"
+		android:layout_gravity="center_horizontal"
+		android:background="@drawable/more" />
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:visibility="gone"
+		android:id="@+id/ll_send_dialog_more">
+
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_marginTop="5dp"
+			android:background="@drawable/line" />
+
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="5dp"
+			android:orientation="horizontal">
+
+			<ImageView
+				android:layout_width="30dp"
+				android:layout_height="30dp"
+				android:id="@+id/iv_send_dialog_default_emoji"
+				android:background="@drawable/emoji"/>
+
+			<ImageView
+				android:id="@+id/iv_send_dialog_choose_pic"
+				android:layout_width="30dp"
+				android:layout_height="30dp"
+				android:layout_marginLeft="10dp"
+				android:layout_gravity="center_vertical"
+				android:background="@drawable/pic" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:visibility="gone"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:id="@+id/ll_send_dialog_face_panel"
+	    android:orientation="vertical">
+		
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="1dp"
+	        android:layout_marginTop="2dp"
+	        android:background="@drawable/line" />
+	    
+	    
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+			android:layout_marginTop="5dp"
+	        android:orientation="horizontal" >
+	        
+	        <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_001"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_001"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>	
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_002"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_002"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal"> 
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_003"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_003"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_004"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_004"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_005"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_005"
+		            android:clickable="true" 
+		            />
+		       </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal"> 
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_006"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_006"
+		            android:clickable="true" 
+		            />
+		      </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_007"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_007"
+		            android:clickable="true" 
+		            />
+		    </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_008"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_008"
+		            android:clickable="true" 
+		            />
+		    </LinearLayout>
+	    </LinearLayout>
+	    
+	    <!-- LINE 2 -->
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="5dp"
+	        android:orientation="horizontal" >
+	        
+	        <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_009"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_009"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>	
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_010"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_010"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal"> 
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_011"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_011"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_012"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_012"
+		            android:clickable="true" 
+		            />
+	        </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_013"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_013"
+		            android:clickable="true" 
+		            />
+		       </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal"> 
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_014"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_014"
+		            android:clickable="true" 
+		            />
+		      </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_015"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_015"
+		            android:clickable="true" 
+		            />
+		    </LinearLayout>
+	        
+	         <LinearLayout 
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:orientation="vertical"
+	            android:gravity="center_horizontal">
+		        <ImageView
+		            android:id="@+id/iv_send_dialog_face_016"
+		            android:layout_width="30dp"
+		            android:layout_height="30dp"
+		            android:background="@drawable/face_016"
+		            android:clickable="true" 
+		            />
+		    </LinearLayout>
+	    </LinearLayout>
+	    
+	</LinearLayout>
+    
+    
+    	      
+</LinearLayout>

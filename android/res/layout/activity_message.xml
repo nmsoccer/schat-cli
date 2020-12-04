@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_baobaobackgray"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        android:background="@color/bg_midnight_blue_lighter">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/mail"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:id="@+id/iv_message_mail"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="信息"
+            android:layout_marginLeft="10dp"
+            android:textSize="12sp"
+            android:textColor="@color/bg_white"
+            android:layout_toRightOf="@id/iv_message_mail"
+            android:layout_centerVertical="true" />
+
+        <ImageView
+            android:id="@+id/iv_message_reload"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="5dp"
+            android:clickable="true"
+            android:onClick="onClick"
+            android:background="@drawable/select_blue_round"
+            />
+
+    </RelativeLayout>
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+
+        <ListView
+            android:id="@+id/lv_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fastScrollEnabled="true"
+            android:divider="@android:color/white"
+            android:drawSelectorOnTop="false" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/iv_fetch_msg_default_back"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:background="@mipmap/ic_launcher"
+            />
+
+    </FrameLayout>
+
+</LinearLayout>

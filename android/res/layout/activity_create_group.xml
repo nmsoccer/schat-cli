@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/bg_body_list_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/iv_create_grp_img"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/group_main"
+                android:scaleType="centerCrop" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:textSize="10sp"
+            android:layout_gravity="center_horizontal"
+            android:text="群组默认私密，创建成功之后可设置为公开"
+            android:gravity="center"
+            android:textColor="@color/bg_main_head_font_body"/>
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/et_create_grp_name"
+                android:inputType="text"
+                android:textSize="13sp"
+                android:paddingLeft="2dp"
+                android:hint="群组名*:最长10字"
+                android:background="@drawable/shape_blue_stroke"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="20"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+
+            <EditText
+                android:id="@+id/et_create_grp_password"
+                android:inputType="numberPassword"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:paddingLeft="2dp"
+                android:maxLength="10"
+                android:hint="密码*：数字或字符 6~24位"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/et_create_grp_desc"
+                android:hint="群简介:最长30字"
+                android:layout_width="250dp"
+                android:paddingLeft="2dp"
+                android:background="@drawable/shape_blue_stroke"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black"
+                android:maxLength="30"
+                android:lines="12" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+
+        <Button
+            android:id="@+id/bt_create_group_submit"
+            android:text="创建群组"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10sp"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:textColor="@color/bg_white"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/select_blue_gray"
+            android:onClick="onBtnClick" />
+
+    </LinearLayout>
+</RelativeLayout>

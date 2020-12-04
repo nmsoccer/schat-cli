@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/bg_body_list_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/user_info_img"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onClick"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/personal"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="30dp"
+            android:id="@+id/user_info_name"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="@color/bg_midnight_blue"
+            android:text="name"
+            />
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text="ID"
+                android:gravity="center"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/user_info_uid"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text=""
+                android:gravity="left|center_vertical"
+                android:textColor="@color/bg_midnight_blue"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text="性别"
+                android:gravity="center"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/user_info_sex"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:gravity="left|center_vertical"
+                android:textColor="@color/bg_midnight_blue"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text="用户昵称"
+                android:gravity="center"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/user_info_role_name"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:gravity="left|center_vertical"
+                android:textColor="@color/bg_midnight_blue"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text="所在地址"
+                android:gravity="center"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/user_info_addr"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:gravity="left|center_vertical"
+                android:textColor="@color/bg_midnight_blue"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text="个人签名"
+                android:gravity="center"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/user_info_desc"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:text=""
+                android:gravity="left|center_vertical"
+                android:textColor="@color/bg_card_item_list_font"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/bt_user_info_join"
+            android:text="拉入群组"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10sp"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:textColor="@color/bg_white"
+            android:background="@drawable/select_blue_gray"
+            android:onClick="onBtnClick" />
+
+    </LinearLayout>
+</RelativeLayout>

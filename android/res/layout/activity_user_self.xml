@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_body_list_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+
+        <ImageView
+            android:id="@+id/iv_user_self_head"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/personal"
+            android:clickable="true"
+            android:scaleType="centerCrop"
+            android:onClick="onImgClick"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+            <TextView
+                android:id="@+id/tv_user_self_show_img"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:background="@drawable/select_null_gray"
+                android:textSize="10sp"
+                android:textColor="@color/bg_main_head_font_body"
+                android:text="点击头像可更换"/>
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_user_self_save_img"
+                android:onClick="onClick"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:background="@drawable/select_blue_gray"
+                android:textSize="10sp"
+                android:textColor="@color/bg_light_teal"
+                android:text="保存头像"/>
+        </FrameLayout>
+
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="30dp"
+            android:id="@+id/tv_user_self_name"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/bg_black"
+            android:text="name"
+            />
+
+        <ImageView
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/et_user_self_password"
+                android:inputType="textPassword"
+                android:background="@drawable/shape_blue_stroke"
+                android:hint="修改密码：字符+数字组成，6~12位"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="12"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/et_user_self_nick_name"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="10"
+                android:hint="修改昵称：最长10字"/>
+
+        </LinearLayout>
+
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/line"
+            />
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/et_user_self_email"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/shape_blue_stroke"
+                android:hint="联系邮箱：用于找回密码"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:maxLength="32" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/et_user_self_addr"
+                android:inputType="text"
+                android:hint="修改地址"
+                android:background="@drawable/shape_blue_stroke"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:maxLength="12" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+
+            <EditText
+                android:id="@+id/et_user_self_desc"
+                android:hint="个人签名：最多50字"
+                android:layout_width="250dp"
+                android:background="@drawable/shape_blue_stroke"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:maxLength="50" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+        <Button
+            android:id="@+id/bt_user_self_submit"
+            android:text="提交"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10sp"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:textColor="@color/bg_white"
+            android:background="@drawable/select_orange_gray"
+            android:onClick="onBtnClick" />
+
+    </LinearLayout>
+
+</RelativeLayout>

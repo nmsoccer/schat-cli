@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_midnight_blue_lighter"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:gravity="center_vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textSize="15sp"
+                android:textColor="@color/bg_white"
+                android:text="公开群组"/>
+
+            <Button
+                android:visibility="gone"
+                android:id="@+id/btn_ground_switch_search"
+                android:onClick="onClick"
+                android:background="@drawable/search"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginRight="10dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_ground_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_ground_search"
+                android:inputType="number"
+                android:background="@color/bg_baobaocornerbody"
+                android:hint="搜索群组id"
+                android:layout_width="250dp"
+                android:layout_centerInParent="true"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="12"/>
+
+            <Button
+                android:id="@+id/btn_ground_do_search"
+                android:onClick="onClick"
+                android:layout_width="23dp"
+                android:layout_height="23dp"
+                android:background="@drawable/search_white"
+                android:layout_marginLeft="5dp"
+                android:layout_centerVertical="true"
+                android:textColor="@color/bg_main_head_font_body"
+                android:layout_toRightOf="@id/et_ground_search" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/line"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="@color/bg_baobaobackgray"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/ptrl_ground"
+            android:divider="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+</LinearLayout>

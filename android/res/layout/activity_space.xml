@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+		android:background="@color/bg_baobaocornerbody"
+        android:orientation="vertical">
+    
+	    <RelativeLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="70dp"
+	        android:background="@color/bg_midnight_blue_lighter">
+
+			<ImageView
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:background="@drawable/person_space_main"
+				android:layout_centerVertical="true"
+				android:layout_alignParentLeft="true"
+				android:layout_marginLeft="5dp"/>
+
+		        	        
+			<TextView
+		        android:id="@+id/tv_space_user_name"
+		      	android:layout_width="wrap_content"
+		       	android:layout_height="wrap_content"
+				android:textColor="@color/bg_white"
+				android:layout_centerInParent="true"
+		       	android:layout_gravity="center_vertical|center_horizontal"
+		       	android:text="个人空间"/>
+
+		</RelativeLayout>
+	    <ImageView
+		        android:layout_width="fill_parent"
+		        android:layout_height="1dp"
+		        android:background="@drawable/line" 
+		        />
+	
+		<ScrollView
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:scrollbars="horizontal"
+		    android:fadeScrollbars="true">
+		    <LinearLayout 
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="vertical">
+		    
+			    <LinearLayout 
+			        android:layout_width="fill_parent"
+			        android:layout_height="70dp"
+			        android:id="@+id/ll_space_modify_self"
+			        android:clickable="true"
+			        android:onClick="onClick"
+			        android:orientation="horizontal">
+			        
+			        <ImageView
+			            android:layout_gravity="center_vertical" 
+			            android:layout_width="35dp"
+			            android:layout_height="35dp"
+			            android:layout_marginRight="10dp"
+			            android:layout_marginLeft="5dp"
+						android:scaleType="centerCrop"
+			            android:background="@drawable/user_edit"/>
+			        
+			        <Button            
+			        	android:layout_width="wrap_content"
+			        	android:layout_height="wrap_content"
+			        	android:layout_gravity="center_vertical"
+			        	android:textColor="@color/bg_midnight_blue"
+			        	android:text="修改资料"
+						android:background="@null" 
+			        	android:textSize="12sp"/>        
+			        
+			    </LinearLayout>
+
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:background="@color/bg_midnight_blue" />
+			
+			    <LinearLayout 
+			        android:layout_width="fill_parent"
+			        android:layout_height="70dp"
+			        android:id="@+id/ll_space_master_group"
+			        android:clickable="true"
+			        android:onClick="onClick"
+			        android:orientation="horizontal">        
+			        
+			        <ImageView
+			            android:layout_gravity="center_vertical" 
+			            android:layout_width="35dp"
+			            android:layout_height="35dp"
+						android:scaleType="centerCrop"
+			            android:layout_marginRight="10dp"
+			            android:layout_marginLeft="5dp"
+			            android:background="@drawable/group_manage"/>
+			        
+			        <Button            
+			        	android:layout_width="wrap_content"
+			        	android:layout_height="wrap_content"
+			        	android:layout_gravity="center_vertical"
+			        	android:text="管理群组"
+						android:textColor="@color/bg_midnight_blue"
+						android:background="@null"        	
+			        	android:textSize="12sp"/>
+
+			    </LinearLayout>
+
+			    <LinearLayout
+					android:visibility="gone"
+			        android:layout_width="fill_parent"
+			        android:layout_height="20dp"
+			        android:background="@color/bg_baobaobackgray">
+			        
+			    </LinearLayout>
+
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:background="@color/bg_midnight_blue" />
+
+			    <LinearLayout 
+			        android:layout_width="fill_parent"
+			        android:layout_height="70dp"
+			        android:id="@+id/ll_space_create_group"
+			        android:clickable="true"
+			        android:onClick="onClick"
+			        android:background="@drawable/button_blue"  
+			        android:orientation="horizontal">
+			        
+			        <ImageView
+			            android:layout_gravity="center_vertical" 
+			            android:layout_width="35dp"
+			            android:layout_height="35dp"
+			            android:layout_marginRight="10dp"
+			            android:layout_marginLeft="5dp"
+			            android:background="@drawable/group_create"/>
+			        
+			        <Button            
+			        	android:layout_width="wrap_content"
+			        	android:layout_height="wrap_content"
+			        	android:layout_gravity="center_vertical"
+						android:textColor="@color/bg_midnight_blue"
+			        	android:text="创建群组"
+						android:background="@null"        	
+			        	android:textSize="12sp"/>       
+			        
+			    </LinearLayout>
+
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:background="@color/bg_midnight_blue" />
+
+
+			    <LinearLayout 
+			        android:layout_width="fill_parent"
+			        android:layout_height="70dp"
+			        android:id="@+id/ll_space_my_message"
+			        android:clickable="true"
+			        android:onClick="onClick"
+			        android:background="@drawable/button_blue"  
+			        android:orientation="horizontal">
+			        
+			        <ImageView
+			            android:layout_gravity="center_vertical" 
+			            android:layout_width="35dp"
+			            android:layout_height="35dp"
+			            android:layout_marginRight="10dp"
+			            android:layout_marginLeft="5dp"
+			            android:background="@drawable/mails"/>
+			        
+			        <Button            
+			        	android:layout_width="wrap_content"
+			        	android:layout_height="wrap_content"
+			        	android:layout_gravity="center_vertical"
+						android:textColor="@color/bg_midnight_blue"
+			        	android:text="系统信息"
+						android:background="@null"        	
+			        	android:textSize="12sp"/>
+
+					<ImageView
+						android:id="@+id/iv_space_sys_msg_new"
+						android:visibility="gone"
+						android:layout_width="15dp"
+						android:layout_height="15dp"
+						android:background="@drawable/red_point"
+						android:layout_gravity="center_vertical"
+						android:layout_marginLeft="5dp"/>
+			        
+			    </LinearLayout>
+
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:background="@color/bg_midnight_blue" />
+
+				<LinearLayout
+					android:layout_width="fill_parent"
+					android:layout_height="70dp"
+					android:id="@+id/ll_space_sys_set"
+					android:clickable="true"
+					android:onClick="onClick"
+					android:background="@drawable/button_blue"
+					android:orientation="horizontal">
+
+					<ImageView
+						android:layout_gravity="center_vertical"
+						android:layout_width="35dp"
+						android:layout_height="35dp"
+						android:layout_marginRight="10dp"
+						android:layout_marginLeft="5dp"
+						android:background="@drawable/space_sys_set"/>
+
+					<Button
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="center_vertical"
+						android:textColor="@color/bg_midnight_blue"
+						android:text="应用设置"
+						android:background="@null"
+						android:textSize="12sp"/>
+
+
+				</LinearLayout>
+
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:layout_marginLeft="10dp"
+					android:layout_marginRight="10dp"
+					android:background="@color/bg_midnight_blue" />
+
+			</LinearLayout>
+		</ScrollView>
+    </LinearLayout>
+    
+    <RelativeLayout 
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+	    
+		<LinearLayout 
+			android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical"
+		    android:layout_alignParentBottom="true">
+		        
+		    <include
+		        layout="@layout/main_bottom_banner" 
+		    />
+		        
+		</LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

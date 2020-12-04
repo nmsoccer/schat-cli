@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="3dp"
+    android:background="@color/bg_head_menu_back"
+    tools:context=".SplashActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@drawable/shape_blue_stroke_rectangle"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/bg_main_head_font_body"
+                android:text="聊天服务名自定义,默认为schat. 服务器地址须手动指定"/>
+            <EditText
+                android:id="@+id/splash_server_name"
+                android:layout_gravity="center_horizontal"
+                android:inputType="text"
+                android:maxLength="32"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_centerHorizontal="true"
+                android:hint="请输入服务名 自定义"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black" />
+
+
+            <EditText
+                android:layout_marginTop="10dp"
+                android:id="@+id/splash_server_addr"
+                android:layout_gravity="center_horizontal"
+                android:inputType="text"
+                android:maxLength="32"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_centerHorizontal="true"
+                android:hint="服务器地址,形式为: ip:port"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black" />
+
+        </LinearLayout>
+
+        <Button
+            android:layout_alignParentBottom="true"
+            android:id="@+id/bt_splash_enter"
+            android:gravity="center"
+            android:textColor="@color/bg_white"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:onClick="onClick"
+            android:background="@drawable/select_blue_gray"
+            android:textSize="10sp"
+            android:text="完成" />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

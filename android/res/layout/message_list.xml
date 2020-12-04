@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"    
+    android:orientation="horizontal" >
+
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="10dp"
+	    android:layout_marginBottom="5dp"
+	    android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+	    android:background="@drawable/shape_black_null"
+	    android:orientation="vertical">
+    
+		    <LinearLayout
+		        android:layout_width="fill_parent"
+		        android:layout_height="30dp"
+		        android:layout_marginTop="3dp"
+		        android:orientation="horizontal">
+        		       		        
+		        <TextView
+			   	    android:id="@+id/author_msg_detail_list"	   	    
+			   	    android:textColor="@color/bg_midnight_blue"
+			   	    android:text="dd"
+			   	    android:layout_marginLeft="5dp"
+			   	    android:layout_width="fill_parent"
+			   	    android:layout_height="wrap_content"
+			   	    android:gravity="left"
+			   	    android:layout_weight="1" />
+		        
+		                	       	    	       
+			    <TextView
+			   	    android:id="@+id/time_msg_detail_list"
+			   	    android:layout_marginRight="10dp"
+			   	    android:textSize="10sp"
+			   	    android:textColor="@color/bg_midnight_blue"
+			   	    android:text=""
+			   	    android:layout_width="fill_parent"
+			   	    android:layout_height="wrap_content"
+			   	    android:layout_weight="1"
+			   	    android:gravity="right|center_vertical" />
+
+				<TextView
+					android:id="@+id/read_msg_detail_list"
+					android:layout_marginRight="10dp"
+					android:textSize="10sp"
+					android:textColor="@color/bg_midnight_blue"
+					android:text=""
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:gravity="right|center_vertical" />
+			   	   		   			
+			</LinearLayout>
+		
+		    <TextView
+				android:id="@+id/content_msg_detail_list"
+				android:text="JJ"
+				android:ellipsize="end"
+				android:textColor="@color/bg_main_head_font_body"
+			   	android:layout_width="fill_parent"
+			   	android:gravity="center_vertical|left"
+			   	android:layout_gravity="center_vertical|left"
+			   	android:layout_marginLeft="5dp"
+			   	android:layout_marginTop="10dp"
+			   	android:layout_marginBottom="5dp"
+			   	android:layout_height="wrap_content" />
+	    
+		    <LinearLayout 
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+				android:visibility="gone"
+		        android:gravity="center_vertical|right">
+			    
+		        
+			    <TextView
+				   		android:id="@+id/type_msg_detail_list"
+				   		android:layout_width="wrap_content"
+				   		android:layout_height="wrap_content"
+				   		android:layout_marginRight="10dp"
+				   		android:layout_gravity="center_horizontal"
+				   		android:textSize="10sp"
+				   		android:layout_marginBottom="2dp"
+				   		android:textColor="@color/bg_main_head_font_pressed"		   		
+				   		android:text="1"/>
+		    </LinearLayout>
+	       
+	    </LinearLayout>	
+    
+</LinearLayout>

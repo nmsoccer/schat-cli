@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_white">
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <RelativeLayout
+            android:background="@null"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <LinearLayout
+                android:id="@+id/ll_main_search"
+                android:layout_alignParentTop="true"
+                android:layout_width="fill_parent"
+                android:layout_height="45dp"
+                android:visibility="gone"
+                android:background="@color/bg_main_head_body"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/bg_main_head_ban_line"
+                    />
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textColor="@color/bg_main_head_font_body"
+                    android:gravity="center_vertical|right"
+                    android:text="搜索"
+                    android:paddingRight="5dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_main_head"
+                android:layout_below="@id/ll_main_search"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/bg_main_head_body"
+                android:orientation="vertical">
+                <TextView
+                    android:visibility="gone"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/bg_main_head_ban_line"
+                    />
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="70dp"
+                    android:background="@color/bg_head_menu_back">
+
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentLeft="true"
+                        android:onClick="onClick"
+                        android:id="@+id/iv_main_head_launcher"
+                        android:layout_marginLeft="5dp"
+                        android:background="@drawable/ic_launcher_round"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:id="@+id/tv_main_head_new"
+                        android:gravity="center"
+                        android:layout_centerInParent="true"
+                        android:clickable="true"
+                        android:onClick="onClickHead"
+                        android:textSize="15sp"
+                        android:textColor="@color/bg_midnight_blue"
+                        android:text="主页" />
+
+
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/bg_main_head_ban_line"
+                    />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/main_frag_container"
+                android:layout_marginBottom="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/ll_main_head"
+                android:orientation="vertical">
+
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentBottom="true">
+
+                <include
+                    layout="@layout/main_bottom_banner"
+                    />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </FrameLayout>
+</RelativeLayout>

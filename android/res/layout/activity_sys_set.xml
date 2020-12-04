@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SysSetActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_baobaobackgray"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="@color/bg_midnight_blue"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:text="应用设置"
+                android:textColor="@color/bg_white" />
+
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:textColor="@color/bg_midnight_blue"
+                        android:text="重置服务地址"/>
+
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:layout_width="300dp"
+                        android:gravity="left"
+                        android:textColor="@color/bg_main_head_font_body"
+                        android:layout_gravity="center_horizontal"
+                        android:text="重置服务地址后下次进入应用时将手动重新输入服务器地址" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="250dp"
+                            android:layout_height="50dp"
+                            android:textColor="@color/bg_black"
+                            android:gravity="center"
+                            android:background="@drawable/shape_blue_stroke"
+                            android:text="fuck"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/tv_sys_set_serv_addr"/>
+
+                        <Button
+                            android:layout_marginTop="5dp"
+                            android:layout_width="100dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center"
+                            android:textColor="@color/bg_white"
+                            android:gravity="center"
+                            android:text="重置"
+                            android:onClick="onClick"
+                            android:textSize="10sp"
+                            android:background="@drawable/select_orange_gray"
+                            android:id="@+id/bt_sys_set_reset_dir"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:textColor="@color/bg_midnight_blue"
+                        android:text="清除本地缓存"/>
+
+
+                    <TextView
+                        android:layout_width="300dp"
+                        android:gravity="left"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/bg_main_head_font_body"
+                        android:layout_gravity="center_horizontal"
+                        android:text="清除本地图片、文件等缓存,使用时将会消耗流量重新拉取" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:layout_width="100dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center"
+                            android:textColor="@color/bg_white"
+                            android:gravity="center"
+                            android:text="清除"
+                            android:onClick="onClick"
+                            android:textSize="10sp"
+                            android:background="@drawable/select_orange_gray"
+                            android:id="@+id/bt_sys_set_clear_cache"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:textColor="@color/bg_midnight_blue"
+                        android:text="修改密码"/>
+
+
+                    <TextView
+                        android:layout_width="300dp"
+                        android:gravity="left"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/bg_main_head_font_body"
+                        android:layout_gravity="center_horizontal"
+                        android:text="修改密码此用户密码.修改成功后下次重新登陆时生效" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical">
+
+                        <EditText
+                            android:layout_width="250dp"
+                            android:layout_height="50dp"
+                            android:textSize="12sp"
+                            android:textColor="@color/bg_black"
+                            android:gravity="center"
+                            android:background="@drawable/shape_blue_stroke"
+                            android:textColorHint="@color/bg_main_head_font_body"
+                            android:singleLine="true"
+                            android:hint="修改密码：字符+数字组成，6~12位"
+                            android:inputType="textPassword"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/et_sys_modify_pass"/>
+
+                        <Button
+                            android:layout_width="100dp"
+                            android:layout_height="25dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_gravity="center"
+                            android:textColor="@color/bg_white"
+                            android:gravity="center"
+                            android:textSize="10sp"
+                            android:text="重置"
+                            android:onClick="onClick"
+                            android:background="@drawable/select_orange_gray"
+                            android:id="@+id/bt_sys_set_modify_pass"/>
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

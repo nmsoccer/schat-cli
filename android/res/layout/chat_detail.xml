@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:layout_width="fill_parent"
+	android:background="@color/bg_body_list_background"
+    android:layout_height="fill_parent" >  
+  
+    <RelativeLayout   
+        android:id="@+id/chat_detail_rl_top"  
+        android:layout_width="fill_parent"  
+        android:layout_alignParentTop="true"
+        android:background="@color/bg_midnight_blue_lighter"
+        android:layout_height="wrap_content">
+        
+        	<LinearLayout 
+				android:layout_width="fill_parent"
+				android:layout_marginTop="5dp"
+				android:layout_height="70dp"
+				android:gravity="center_vertical"
+				android:orientation="vertical">
+
+			<RelativeLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+				<ImageView
+					android:id="@+id/chat_detail_iv_grp"
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_marginLeft="5dp"
+					android:layout_alignParentLeft="true"
+					android:clickable="true"
+					android:background="@drawable/group_main_white"
+					android:onClick="onClick"
+					/>
+
+				<TextView
+					android:id="@+id/chat_detail_tv_chat_name"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="10dp"
+					android:layout_toRightOf="@id/chat_detail_iv_grp"
+					android:layout_centerVertical="true"
+					android:textSize="12sp"
+					android:text="群聊"
+					android:textColor="@color/bg_white"/>
+
+
+				<ImageView
+					android:id="@+id/chat_detail_iv_his"
+					android:onClick="onClick"
+					android:background="@drawable/select_blue_round"
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginRight="15dp"
+					/>
+			</RelativeLayout>
+
+        </LinearLayout>  
+    </RelativeLayout>  
+      
+    <RelativeLayout   
+        android:id="@+id/chat_detail_rl_bottom"  
+        android:layout_alignParentBottom="true" 
+        android:layout_width="fill_parent"     
+        android:layout_height="wrap_content">
+        
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/button_color_blue"
+            android:onClick="onClickSendMsg"
+            android:textColor="@color/bg_white"
+            android:layout_marginTop="5dp"
+            android:text="回复"
+            />        
+        
+	     
+    </RelativeLayout>  
+      
+    <ListView   
+        android:id="@+id/chat_detail_listview"         
+        android:layout_width="fill_parent"  
+        android:layout_height="fill_parent"  
+        android:layout_above="@id/chat_detail_rl_bottom"  
+        android:layout_below="@id/chat_detail_rl_top"  
+        android:layout_marginLeft="10dp"  
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"  
+        android:cacheColorHint="#00000000"  
+        android:divider="@null"  
+        android:listSelector="#00000000"  
+        android:dividerHeight="3dp"  
+        android:scrollbars="none"/>  
+      
+</RelativeLayout>

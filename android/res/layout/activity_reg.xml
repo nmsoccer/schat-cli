@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_body_list_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@color/bg_main_head_font_body"
+            android:textSize="18sp"
+            android:text="注册"
+            />
+
+
+
+        <ImageView
+            android:id="@+id/reg_img"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/personal"
+            android:clickable="true"
+            android:scaleType="centerCrop"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10sp"
+            android:textColor="@color/bg_main_head_font_body"
+            android:text="头像可在登陆后修改"/>
+        <TextView
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/bg_blue_of_button"
+            android:textSize="9sp"
+            android:text="更多个人照片和主页背景可以在登录之后个人头像里上传"/>
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            />
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/ll_reg_me_1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_reg_me_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="5dp"
+                android:clickable="true"
+                android:onClick="onClick"
+                android:scaleType="centerInside"/>
+
+            <TextView
+                android:id="@+id/tv_reg_edit_me_1"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/bg_white"
+                android:textSize="10sp"
+                android:layout_gravity="right"
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="onClick"
+                android:background="@drawable/button_color_blue"
+                android:paddingLeft="1dp"
+                android:paddingRight="1dp"
+                android:text="个人展示(非必须)" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/ll_reg_me_2"
+            android:layout_marginTop="5dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_reg_me_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="5dp"
+                android:clickable="true"
+                android:onClick="onClick"
+                android:scaleType="centerInside"/>
+
+            <TextView
+                android:id="@+id/tv_reg_edit_me_2"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/bg_white"
+                android:textSize="10sp"
+                android:layout_gravity="right"
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="onClick"
+                android:background="@drawable/button_color_blue"
+                android:paddingLeft="1dp"
+                android:paddingRight="1dp"
+                android:text="个人展示(非必须)"/>
+
+        </LinearLayout>
+
+
+        <TextView
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@color/bg_black"
+            android:textSize="12sp"
+            android:text="性别*" />
+
+        <RadioGroup
+            android:id="@+id/reg_sexual"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/reg_female"
+                android:checked="true"
+                android:textSize="10sp"
+                android:textColor="@color/bg_orange"
+                android:text="女"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+            <RadioButton
+                android:id="@+id/reg_male"
+                android:textSize="10sp"
+                android:textColor="@color/bg_midnight_blue"
+                android:text="男"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+
+        </RadioGroup>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/reg_user"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_main_head_font_body"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="10"
+                android:hint="账户名*：最长12字(唯一，设置后无法修改)"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/reg_password"
+                android:inputType="textPassword"
+                android:background="@drawable/shape_blue_stroke"
+                android:hint="密码*：字符+数字组成，6~12位"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="12"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/line"
+            />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/reg_nick_name"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/shape_blue_stroke"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="10"
+                android:hint="昵称：最长12字"/>
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/reg_email"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/shape_blue_stroke"
+                android:hint="联系邮箱：用于找回密码"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:maxLength="32" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/reg_city"
+                android:inputType="text"
+                android:hint="所在地"
+                android:background="@drawable/shape_blue_stroke"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:maxLength="12" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+
+            <EditText
+                android:id="@+id/reg_self"
+                android:hint="个人签名：最长30字"
+                android:layout_width="250dp"
+                android:background="@drawable/shape_blue_stroke"
+                android:layout_height="30dp"
+                android:textSize="12sp"
+                android:textColorHint="@color/bg_font_black"
+                android:textColor="@color/bg_black"
+                android:singleLine="true"
+                android:maxLength="30" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/line"
+            />
+
+        <Button
+            android:id="@+id/reg_submit"
+            android:text="提交"
+            android:layout_gravity="center_horizontal"
+            android:textSize="10sp"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:textColor="@color/bg_white"
+            android:background="@drawable/select_orange_gray"
+            android:onClick="onBtnClick" />
+
+    </LinearLayout>
+
+</RelativeLayout>

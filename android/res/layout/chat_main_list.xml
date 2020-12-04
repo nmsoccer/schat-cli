@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layerType="software"
+		android:orientation="vertical">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="70dp"
+			android:orientation="horizontal">
+
+			<ImageView
+				android:id="@+id/img_chat_main_list"
+				android:layout_marginTop="2dp"
+				android:layout_marginBottom="2dp"
+				android:layout_marginRight="2dp"
+				android:layout_marginLeft="5dp"
+				android:layout_gravity="center"
+				android:background="@drawable/chat_main"
+				android:layout_width="40dp"
+				android:layout_height="40dp"/>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				android:layout_marginLeft="5dp"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/grp_chat_main_list"
+					android:layout_width="80dp"
+					android:ellipsize="end"
+					android:singleLine="true"
+					android:layout_height="fill_parent"
+					android:layout_weight="1"
+					android:gravity="bottom"
+					android:text="群聊1"
+					android:textColor="@color/bg_blue"
+					android:background="@null"
+					android:textSize="12sp"/>
+				<TextView
+					android:id="@+id/grp_id_chat_main_list"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:visibility="gone" />
+				<TextView
+					android:id="@+id/msg_id_chat_main_list"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:visibility="gone" />
+				<TextView
+					android:id="@+id/time_chat_main_list"
+					android:layout_width="wrap_content"
+					android:layout_height="fill_parent"
+					android:gravity="bottom"
+					android:layout_weight="1"
+					android:textColor="@color/bg_midnight_blue"
+					android:text="2014"
+					android:textSize="10sp"
+					/>
+			</LinearLayout>
+			<RelativeLayout
+				android:layout_width="match_parent"
+				android:layout_marginLeft="10dp"
+				android:layout_height="match_parent">
+				<TextView
+					android:id="@+id/content_chat_main_list"
+					android:singleLine="true"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerVertical="true"
+					android:layout_alignParentLeft="true"
+					android:textColor="@color/bg_xiaomifontgray"
+					android:text="AA"
+					android:ellipsize="end"
+					android:background="@null"
+					android:textSize="12sp"/>
+				<ImageView
+					android:visibility="gone"
+					android:id="@+id/content_iv_chat_main_list"
+					android:layout_width="30dp"
+					android:layout_height="20dp"
+					android:background="@drawable/chat_list_pic"
+					android:layout_toRightOf="@id/content_chat_main_list"
+					android:layout_centerVertical="true"/>
+				<ImageView
+					android:visibility="gone"
+					android:id="@+id/red_point_chat_main_list"
+					android:layout_marginBottom="3dp"
+					android:layout_marginRight="3dp"
+					android:layout_width="15dp"
+					android:layout_height="15dp"
+					android:layout_alignParentRight="true"
+					android:layout_alignParentBottom="true"
+					android:background="@drawable/red_point" />
+			</RelativeLayout>
+
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_marginTop="2dp"
+			android:layout_height="1dp">
+
+			<TextView
+				android:layout_width="45dp"
+				android:layout_height="match_parent" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@drawable/bg_dash_line"/>
+		</LinearLayout>
+
+	</LinearLayout>
+</LinearLayout>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fl_main_bottom"
+    android:layout_width="fill_parent"
+    android:layout_height="60dp"
+    android:background="@null">
+
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@null" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/bg_midnight_blue"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/ll_main_bottom_home"
+                    android:onClick="onClickBottom"
+                    android:clickable="true"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:background="@drawable/select_null_gray"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/main_bottom_home" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/bg_white"
+                        android:text="主页"
+                        android:layout_gravity="center_horizontal"
+                        android:textSize="9sp"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1">
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/ll_main_bottom_user"
+                    android:onClick="onClickBottom"
+                    android:clickable="true"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:background="@drawable/select_null_gray"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="2dp"
+                        android:scaleType="centerInside"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/main_bottom_user" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/bg_white"
+                        android:text="个人"
+                        android:layout_gravity="center_horizontal"
+                        android:textSize="9sp"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@null">
+
+        <Button
+            android:id="@+id/btn_main_bottom_post"
+            android:onClick="onClickBottom"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/btn_main_bottom_post"
+            />
+
+
+    </RelativeLayout>
+
+</FrameLayout>
