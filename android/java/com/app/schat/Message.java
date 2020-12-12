@@ -82,7 +82,10 @@ public class Message {
     public static ArrayList<MessageItem> fetch_msg_item() {
         String log_label = "fetch_msg_item";
         ArrayList<MessageItem> dst_list = new ArrayList<>();
-
+        if(AppConfig.db == null) {
+            Log.i(log_label , "db not ready!");
+            return dst_list;
+        }
         //query from db
         String tab_name = DBHelper.MESSAGE_TB_NAME;
         String sql =  "SELECT * FROM " + tab_name + " ORDER BY msg_id DESC limit 40"; //latest 40 chat
@@ -128,6 +131,10 @@ public class Message {
         String log_label = "add_msg_item";
         if(item == null) {
             Log.d(log_label , "arg nil!");
+            return false;
+        }
+        if(AppConfig.db == null) {
+            Log.i(log_label , "db not ready!");
             return false;
         }
 

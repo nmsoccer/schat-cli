@@ -245,6 +245,7 @@ public class SysSetActivity extends AppCompatActivity {
         switch (from) {
             case LOAD_FROM_RESET_ADDR:
                 AppConfig.PrintInfo(getBaseContext() , "重置成功");
+                finish();
                 break;
             case LOAD_FROM_CLEAR_CACHE:
                 AppConfig.PrintInfo(getBaseContext() , "清除成功");

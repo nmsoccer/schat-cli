@@ -45,6 +45,7 @@ public class UserSelfActivity extends AppCompatActivity {
     private EditText et_addr;
     private EditText et_email;
     private EditText et_desc;
+    private TextView tv_user_uid;
 
 
     private ProgressDialog progress_dialog;
@@ -80,6 +81,8 @@ public class UserSelfActivity extends AppCompatActivity {
         et_addr.setHint(basic_info.addr);
         tv_show_img = (TextView)this.findViewById(R.id.tv_user_self_show_img);
         tv_save_img = (TextView)this.findViewById(R.id.tv_user_self_save_img);
+        tv_user_uid = (TextView)this.findViewById(R.id.tv_user_self_uid);
+        tv_user_uid.setText("用户ID " + AppConfig.UserUid);
 
         et_desc = (EditText)this.findViewById(R.id.et_user_self_desc);
         et_desc.setHint(AppConfig.user_info.detail.desc);
@@ -270,10 +273,6 @@ public class UserSelfActivity extends AppCompatActivity {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                break;
-            case AppConfig.FILE_CROP_CODE:
-                Bitmap bmp_tmp = intent.getParcelableExtra("data");
-                bmp_get = AppConfig.compressImage(bmp_tmp, AppConfig.UPLOAD_FILE_SIZE/1024);
                 break;
             default:
                 break;

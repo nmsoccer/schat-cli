@@ -12,10 +12,10 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher_round"
         android:label="@string/app_name"
-        android:networkSecurityConfig="@xml/net_sec"
         android:roundIcon="@drawable/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
+
         <activity
             android:name=".SplashActivity"
             android:screenOrientation="portrait">
@@ -154,10 +154,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SysSetActivity"
+        <activity
+            android:name=".SysSetActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="SysSet" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".VideoActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="VideoPlay" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

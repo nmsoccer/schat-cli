@@ -140,6 +140,10 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onClick(View view)
     {
+        if(AppConfig.IsLogin()) {
+            AppConfig.PrintInfo(this , "您已登陆");
+            return;
+        }
         UserName = login_user.getText().toString();
         Password = login_pass.getText().toString();
 
@@ -236,6 +240,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         /***检查SQLITE*/
+        /*to login rsp
         String db_name = AppConfig.ServerSpace + "_" + UserName + "_" + DBHelper.DATABASE_NAME;	//与SPACE 和 用户名绑定的库
         DBHelper db_helper = new DBHelper(getBaseContext(),db_name,null, DBHelper.DATABASE_VERSION);
         AppConfig.db = db_helper.getWritableDatabase();
@@ -249,6 +254,7 @@ public class LoginActivity extends AppCompatActivity {
             //调取聊天记录中所有姓名
             Log.i(log_label , "open db success!");
         }
+         */
 
         //打开或创建server_space_schat/user本地文件目录
         CreateFileDir(LoginActivity.this , UserName);
@@ -335,7 +341,7 @@ public class LoginActivity extends AppCompatActivity {
         //query
         if(grp_info.local_last_msg_id == 0) {
             Log.d(log_label , "local msg is null! query history from net! grp_id:" + grp_info.grp_id);
-            String query = CSProto.CSChatHistoryReq(grp_info.grp_id , -1);
+            String query = CSProto.CSChatHistoryReq(grp_info.grp_id , -1 , 0);
             AppConfig.SendMsg(query);
         }
 
@@ -372,7 +378,7 @@ public class LoginActivity extends AppCompatActivity {
                             });
                             return;
                         }
-                        Thread.sleep(100); //sleep
+                        Thread.sleep(1000); //sleep
                         v++;
                     } catch (InterruptedException b) {
                         b.printStackTrace();

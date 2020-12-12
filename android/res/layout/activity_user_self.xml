@@ -95,6 +95,27 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+
+
+            <TextView
+                android:id="@+id/tv_user_self_uid"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:text=""
+                android:gravity="center"
+                android:textColor="@color/bg_midnight_blue"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">

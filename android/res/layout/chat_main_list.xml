@@ -85,7 +85,6 @@
 					android:id="@+id/content_iv_chat_main_list"
 					android:layout_width="30dp"
 					android:layout_height="20dp"
-					android:background="@drawable/chat_list_pic"
 					android:layout_toRightOf="@id/content_chat_main_list"
 					android:layout_centerVertical="true"/>
 				<ImageView

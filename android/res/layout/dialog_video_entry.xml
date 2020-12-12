@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/bg_bak_trans">
+    <VideoView
+        android:layout_height="match_parent"
+        android:id="@+id/vv_dialog_video_entry"
+        android:layout_width="match_parent"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>

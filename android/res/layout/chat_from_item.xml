@@ -52,20 +52,19 @@
             >
             <TextView
                 android:layout_marginLeft="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:padding="5dp"
                 android:id="@+id/chat_item_tv_content"
                 android:layout_width="wrap_content"
-                android:layout_height="45dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/shape_gray_solid_rect"
                 android:autoLink="all"
                 android:textColorLink="@color/bg_midnight_blue_lighter"
                 android:text="test"
-                android:gravity="left|center"
+                android:gravity="left|center_vertical"
                 android:clickable="false"
                 android:focusable="false"
-                android:lineSpacingExtra="2dp"
-                android:minHeight="40dp"
+                android:lineSpacingExtra="3dp"
+                android:minHeight="45dp"
                 android:textColor="@color/bg_black"
                 android:textSize="14sp" />
             <ImageView
@@ -76,8 +75,22 @@
                 android:visibility="gone"
                 android:background="@color/bg_bak_trans"
                 android:id="@+id/chat_item_iv_content"/>
+
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:textColor="@color/bg_white"
+                android:gravity="center_horizontal|bottom"
+                android:paddingBottom="5dp"
+                android:textSize="10sp"
+                android:visibility="gone"
+                android:background="@drawable/video_bak"
+                android:id="@+id/chat_item_tv_duration"
+                android:layout_gravity="center"
+                />
         </FrameLayout>
-          
-    </RelativeLayout>  
-      
+
+    </RelativeLayout>
+
+
 </LinearLayout> 

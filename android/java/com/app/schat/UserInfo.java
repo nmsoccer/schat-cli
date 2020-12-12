@@ -130,6 +130,7 @@ public class UserInfo {
     public UserBasic basic;
     public UserDetail detail;
     public AtomicBoolean lock;
+    public static int MAX_CREATE_GROUP_COUNT = 10; //default
 
     public UserInfo() {
         this.account_name = "";
@@ -141,6 +142,15 @@ public class UserInfo {
 
 
     //static functions
+    public static int MasterGroupCount() {
+        if(AppConfig.user_info == null) {
+            return -1;
+        }
+
+        return AppConfig.user_info.detail.chat_info.master_group;
+    }
+
+
     public static UserChatGroup getChatGrp(long grp_id) {
         String log_label = "getChatGrp";
         if(AppConfig.user_info == null) {
@@ -198,6 +208,9 @@ public class UserInfo {
         }
 
         do {
+            //create grp dir
+            AppConfig.CreateGroupFileDir(grp_id);
+
             //grp
             UserChatGroup grp_info = all_groups.get(grp_id);
             if (grp_info == null) {

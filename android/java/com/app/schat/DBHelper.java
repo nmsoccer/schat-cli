@@ -162,7 +162,8 @@ public class DBHelper extends SQLiteOpenHelper
 
 		//sql
 		String tb_name = grp_id_2_tab_name(grp_id);
-		String sql = "update " + tb_name + " set chat_content='" + canceled_content + "', flag=" + ChatInfo.CHAT_FLAG_CANCELED + ", chat_type=" +
+		String enc_content = EncryptChatContent(canceled_content , AppConfig.user_local_des_key);
+		String sql = "update " + tb_name + " set chat_content='" + enc_content + "', flag=" + ChatInfo.CHAT_FLAG_CANCELED + ", chat_type=" +
 				CSProto.CHAT_MSG_TYPE_TEXT + " WHERE grp_id=" +	grp_id + " AND msg_id=" + msg_id + " ";
 		try {
 			AppConfig.db.execSQL(sql);

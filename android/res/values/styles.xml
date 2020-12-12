@@ -8,7 +8,7 @@
     </style>
 
     <!-- DIY -->
-    <style name="load_proc_dig" parent="android:Theme.Dialog">
+    <style name="load_pro_dig" parent="android:Theme.Dialog">
         <item name="android:windowFrame">@null</item>       <!-- Dialog的windowFrame框为无 -->
         <item name="android:windowBackground">@android:color/transparent</item> <!-- 设置dialog的背景 -->
         <item name="android:windowNoTitle">true</item>      <!-- 是否显示title -->
@@ -24,11 +24,16 @@
         <item name="android:windowIsTranslucent">false</item><!-- 半透明 -->
         <item name="android:windowNoTitle">true</item><!-- 无标题 -->
         <item name="android:windowBackground">@drawable/send_dialog_background</item><!-- 背景透明 -->
-        <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
+        <item name="android:backgroundDimEnabled">false</item><!-- 模糊 -->
         <item name="android:backgroundDimAmount">30</item><!-- 灰度 -->
         <item name="android:windowContentOverlay">@null</item><!-- 对话框是否有遮盖 -->
-        <item name="android:windowAnimationStyle">@style/dialog_animation</item><!-- 弹出或者进入时的动画效果 -->
+        <item name="android:windowAnimationStyle">@style/NoAnimationDialog</item><!-- 弹出或者进入时的动画效果 -->
         <item name="android:colorBackgroundCacheHint">@null</item><!-- 背景缓存颜色 -->
+    </style>
+
+    <style name="NoAnimationDialog" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
     </style>
 
     <style name="dialog_animation">

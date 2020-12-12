@@ -59,6 +59,7 @@ public class CSProto {
     public static final int COMMON_NOTIFY_T_DEL_MEM   = 3;
     public static final int COMMON_NOTIFY_T_HEAD_URL  = 4;
     public static final int COMMON_NOTIFY_T_ENTER_GROUP = 5;
+    public static final int COMMON_NOTIFY_T_SERVER_SETTING = 6;
 
     //COMMON QUERY
     public static final int COMMON_QUERY_OWN_GRP_SNAP = 0;
@@ -110,6 +111,7 @@ public class CSProto {
     //CHAT MSG TYPE
     public static final int CHAT_MSG_TYPE_TEXT = 0;
     public static final int CHAT_MSG_TYPE_IMG = 1;
+    public static final int CHAT_MSG_TYPE_MP4 = 2;
 
     //SYNC CHAT TYPE
     public static final int SYNC_CHAT_TYPE_NORMAL = 0;
@@ -362,7 +364,7 @@ public class CSProto {
 
     //generate chat history req
     //[oldest-xx , oldest)
-    public static String CSChatHistoryReq(long grp_id , long oldest_msg_id) {
+    public static String CSChatHistoryReq(long grp_id , long oldest_msg_id , int count) {
         try {
             //root
             JSONObject obj = new JSONObject();
@@ -372,6 +374,7 @@ public class CSProto {
             JSONObject sub = new JSONObject();
             sub.put("grp_id" , grp_id);
             sub.put("now_msg_id" , oldest_msg_id);
+            sub.put("count" , count);
 
             //all
             obj.put("sub" , sub);
@@ -750,7 +753,25 @@ public class CSProto {
                 user_info.detail = detail_info;
 
             AppConfig.user_info = user_info;
+
+            //open db here
+            String db_name = AppConfig.ServerSpace + "_" + user_info.account_name + "_" + DBHelper.DATABASE_NAME;	//与SPACE 和 用户名绑定的库
+            DBHelper db_helper = new DBHelper(AppConfig.main_act,db_name,null, DBHelper.DATABASE_VERSION);
+            AppConfig.db = db_helper.getWritableDatabase();
+            if(AppConfig.db == null)
+            {
+                AppConfig.PrintInfo(AppConfig.main_act, "系统故障，将无法保存您的聊天记录");
+            }
+            else
+            {
+                //AppConfig.PrintInfo(getBaseContext(), "Open DB Success!\n");
+                //调取聊天记录中所有姓名
+                Log.i(log_label , "open db success! db_name:" + db_name);
+            }
+            break;
         } while (false);
+
+
         AppConfig.common_op_lock.set(false);
     }
 
@@ -778,6 +799,9 @@ public class CSProto {
                 break;
             case COMMON_NOTIFY_T_ENTER_GROUP:
                 CommonNotifyEnterGroup(sub);
+                break;
+            case COMMON_NOTIFY_T_SERVER_SETTING:
+                CommonNotifyServerSetting(sub);
                 break;
             default:
                 Log.e(log_cs , "unkown notify type:" + type);
@@ -896,6 +920,112 @@ public class CSProto {
         UserInfo.EnterGroup(grp_id , grp_name , false);
     }
 
+    //server setting
+    //like:"sub":{"type":6,"grp_id":0,"intv":0,"strv":"{\"chat_config_table\":{\"count\":2,\"res\":[{\"name\":\"max_create_group\",\"value\":\"10\"},{\"name\":\"max_reconnect_times\",\"value\":\"5\"}]}}","strs":null}
+    private static void CommonNotifyServerSetting(JSONObject sub) throws  JSONException {
+        String log_label = "NotifyServerSetting";
+        if(AppConfig.ServerSettingRecved) {
+            Log.d(log_label , "already recved!");
+            return;
+        }
+        String setting_str = sub.getString("strv");
+        if(TextUtils.isEmpty(setting_str)) {
+            Log.e(log_label , "setting info null");
+            return;
+        }
+
+        //parse
+        JSONTokener parser = new JSONTokener(setting_str);
+        //1.get root
+        JSONObject root = (JSONObject) parser.nextValue();
+
+
+        //table
+        JSONObject o_config_table = root.getJSONObject("chat_config_table");
+        if(o_config_table == null) {
+            Log.e(log_label , "o_config_table null");
+            return;
+        }
+
+        //count
+        int count = o_config_table.getInt("count");
+        Log.d(log_label , "res count:" + count);
+
+        //res
+        JSONArray o_res = o_config_table.getJSONArray("res");
+        if(o_res == null) {
+            Log.e(log_label , "o_res null");
+            return;
+        }
+
+        JSONObject o_cfg_item;
+        String name;
+        String value;
+        int v;
+        for(int i=0; i<o_res.length(); i++) {
+            o_cfg_item = o_res.getJSONObject(i);
+            if(o_cfg_item == null) {
+                Log.e(log_label , "item nil at index:" + i);
+                continue;
+            }
+
+            name = o_cfg_item.getString("name");
+            value = o_cfg_item.getString("value");
+            if(TextUtils.isEmpty(name) || TextUtils.isEmpty(value)) {
+                Log.e(log_label , "item info illegal! content:" + o_cfg_item.toString());
+                continue;
+            }
+            //Log.d(log_label , "name:" + name + " v:" + value);
+
+            //handle
+            switch (name) {
+                case "max_create_group":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "max_create_group " + UserInfo.MAX_CREATE_GROUP_COUNT + " --> " + v);
+                    if(v > 0)
+                        UserInfo.MAX_CREATE_GROUP_COUNT = v;
+                    break;
+                case "max_reconnect_times":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "max_reconnect_times " + AppConfig.MAX_DIS_RECONN_TIMES + " --> " + v);
+                    if(v > 0)
+                        AppConfig.MAX_DIS_RECONN_TIMES = v;
+                    break;
+                case "heart_frequent":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "heart_frequent " + AppConfig.HEART_BEAT_FREQUENT + " --> " + v);
+                    if(v > 0)
+                        AppConfig.HEART_BEAT_FREQUENT = v;
+                    break;
+                case "req_timeout":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "req_timeout " + AppConfig.REQ_TIMEOUT + " --> " + v);
+                    if(v > 0) {
+                        AppConfig.REQ_TIMEOUT = v;
+                    }
+                    break;
+                case "upload_file_size":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "upload_file_size " + AppConfig.UPLOAD_NORMAL_FILE_SIZE + " --> " + v);
+                    if(v > 0)
+                        AppConfig.UPLOAD_NORMAL_FILE_SIZE = v;
+                    break;
+                case "upload_img_size":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "upload_img_size " + AppConfig.MAX_IMG_SIZE + " --> " + v);
+                    if(v > 0)
+                        AppConfig.MAX_IMG_SIZE = v;
+                    break;
+                default:
+                    Log.e(log_label , "unkown option:" + name);
+                    break;
+            }
+
+
+        }
+
+    }
+
 
     //cs ground group rsp
     private static void CSGroupGroundRsp(JSONObject sub) throws JSONException {
@@ -987,6 +1117,7 @@ public class CSProto {
 
             //insert db
             if(AppConfig.db == null) {
+                Log.i(log_label , "sql not ready! msg_id:" + msg.msg_id);
                 continue;
             }
             int is_from = 1; //from chat
@@ -1020,7 +1151,16 @@ public class CSProto {
             }
 
         }
-        UserInfo.setGrpNewMsgStat(grp_id , true);
+        UserChatGroup u_grp = UserInfo.getChatGrp(grp_id);
+        if(u_grp == null) {
+            Log.e(log_label , "grp info nil!");
+            return;
+        }
+        u_grp.new_msg.set(true);
+        if(curr_max_msg_id > u_grp.serv_last_msg_id) { //update server max
+            u_grp.serv_last_msg_id = curr_max_msg_id;
+        }
+        //UserInfo.setGrpNewMsgStat(grp_id , true);
         //
         /*
         if(curr_max_msg_id > 0) {
@@ -1098,6 +1238,10 @@ public class CSProto {
             u_grp.local_last_msg_id = max_msg_id;
             u_grp.oldest_msg_id = max_msg_id; //reset
             Log.d(log_label , "set local last_msg_id:" + max_msg_id);
+        }
+        if(u_grp != null && u_grp.serv_last_msg_id < max_msg_id) {
+            u_grp.serv_last_msg_id = max_msg_id;
+            Log.d(log_label , "set server last_msg_id:" + max_msg_id);
         }
 
 

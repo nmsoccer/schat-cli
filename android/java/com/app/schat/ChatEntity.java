@@ -15,7 +15,7 @@ public class ChatEntity
     public String file_name;
     public Bitmap bmp_content;
     public long chat_flag;
-
+    public long video_time;
     public boolean isComeMsg() {
         return isComeMsg;
     }

@@ -13,7 +13,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,9 +27,13 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -34,12 +41,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +66,7 @@ public class ChatDetailActivity extends Activity {
     private final int LOAD_FLAG_CREATE = 0;
     private final int LOAD_FLAG_HIS = 1;
     private final int LOAD_FLAG_NEW = 2;
+    private final int LOAD_FLAG_CRAETE_NEW = 3; //create with new msg
 
     private TextView tv_chat_name = null;
     private ImageView iv_chat_grp;
@@ -73,13 +84,22 @@ public class ChatDetailActivity extends Activity {
 
     private Dialog dialog;
     private ProgressDialog progress_dialog;
-    private Bitmap bit_map = null;
-    private Bitmap bmp_img = null; //will upload image
-    //private InputStream img_is = null;
+    //private Bitmap bit_map = null;
+    private Bitmap bmp_upload_img = null; //will upload image
+    //private InputStream update_video_is = null; //for update video
+    private String update_video_url_str = "";
     private int send_type = CSProto.CHAT_MSG_TYPE_TEXT;
     private FileServInfo file_serv_info = null;
     private int standard_item_img_px = 100;
     private long last_click_history = 0;
+    private UserChatGroup u_grp = null;
+    //image dialog
+    AlertDialog img_dialog; //show chat big image
+    LayoutInflater inflater;
+    View content_view;
+    ZoomableImageView iv_large;
+    Bitmap chat_img_origion;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +131,37 @@ public class ChatDetailActivity extends Activity {
         //handler
         handler = new Handler();
 
+        //img dialog
+        img_dialog = new AlertDialog.Builder(ChatDetailActivity.this).create();
+
+        //加载布局并获得相关widget
+        inflater = LayoutInflater.from(ChatDetailActivity.this);
+        content_view = inflater.inflate(R.layout.dialog_chat_image_entry, null);
+        iv_large = (ZoomableImageView) content_view.findViewById(R.id.iv_chat_image_entry);
+        img_dialog.setView(content_view);
+        //img_dialog.setCanceledOnTouchOutside(false); //outside will not close dialog;
+        // 监听 Cancel 事件
+        img_dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                // 关闭 Dialog
+                dialog.dismiss();
+                Log.d("img_dialog" , "on canceled");
+                chat_img_origion = null;
+                Drawable drawable=((ImageView) iv_large).getDrawable();
+                if(drawable instanceof BitmapDrawable){
+                    Bitmap bmp = ((BitmapDrawable)drawable).getBitmap();
+                    if (bmp != null && !bmp.isRecycled()){
+                        ((ImageView) iv_large).setImageDrawable(null);
+                        bmp.recycle();
+                        Log.d("img_dialog" , "have recycled ImageView Bitmap");
+                        bmp=null;
+                    }
+                }
+            }
+        });
+
+
         //size
         standard_item_img_px = AppConfig.dip2px(this , AppConfig.CHAT_IMG_STANDARD_SIZE);
         Log.d(log_label , "img_standard_size:" + standard_item_img_px);
@@ -120,7 +171,13 @@ public class ChatDetailActivity extends Activity {
         cmb = (ClipboardManager)this.getSystemService(Context.CLIPBOARD_SERVICE);
 
         //Reset Window
-        UserInfo.ResetGrpOldestMsgId(grp_id);
+        u_grp = UserInfo.getChatGrp(grp_id);
+        if(u_grp == null) {
+            Log.e(log_label , "u_grp null! grp_id:" + grp_id);
+            AppConfig.PrintInfo(this , "数据错误");
+            return;
+        }
+
 
         /***List*/
         chatList = new ArrayList<ChatEntity>();
@@ -149,8 +206,15 @@ public class ChatDetailActivity extends Activity {
         } else
             iv_chat_grp.setBackgroundResource(R.drawable.group_main_white);
 
-        //load init chat
-        LoadChatItem(grp_id , LOAD_FLAG_CREATE);
+        //Set Read Window
+        u_grp.oldest_msg_id = u_grp.local_last_msg_id;
+        if(u_grp.serv_last_msg_id > u_grp.local_last_msg_id)
+            LoadChatItem(grp_id , LOAD_FLAG_CRAETE_NEW);
+        else
+            LoadChatItem(grp_id , LOAD_FLAG_CREATE);
+        //UserInfo.ResetGrpOldestMsgId(grp_id);
+        //load local
+
 
         //check new chat
         check_chat = true;
@@ -161,6 +225,7 @@ public class ChatDetailActivity extends Activity {
     protected void onDestroy()
     {
         super.onDestroy();
+        chatList.clear();
         check_chat = false;
     }
 
@@ -195,7 +260,7 @@ public class ChatDetailActivity extends Activity {
 
 
                 //query history
-                //AppConfig.PrintInfo(this, "正在提交...用户名：" + UserName + " 密码：" + Password);
+                AppConfig.PrintInfo(this, "正在拉取历史记录...");
                 progress_dialog = new ProgressDialog(ChatDetailActivity.this);
                 progress_dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress_dialog.setMessage("正在拉取...");
@@ -280,7 +345,7 @@ public class ChatDetailActivity extends Activity {
 
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             ChatHolder chatHolder = null;
             if (convertView == null)
             {
@@ -298,6 +363,7 @@ public class ChatDetailActivity extends Activity {
                 chatHolder.userImageView = (ImageView) convertView.findViewById(R.id.chat_item_iv_user_image);
                 chatHolder.userTextView = (TextView) convertView.findViewById(R.id.chat_item_tv_name);
                 chatHolder.contentImageView = (ImageView)convertView.findViewById(R.id.chat_item_iv_content);
+                chatHolder.durationTextView = (TextView)convertView.findViewById(R.id.chat_item_tv_duration);
                 convertView.setTag(chatHolder);
             }
             else
@@ -322,19 +388,27 @@ public class ChatDetailActivity extends Activity {
                         case R.id.chat_item_iv_content:
                             if(entity.file_name==null || entity.file_name.length()<=0)
                                 return;
-                            /*
-                            Drawable d = ((ImageView)view).getDrawable();
-                            if(d == null)
-                                return;
-                            //Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
-                            //Bitmap bitmap = ((BitmapDrawable) ((ImageView) view).getDrawable()).getBitmap();
-                             */
-                            showFullImg(entity.file_name);
+                            if(entity.chat_type == CSProto.CHAT_MSG_TYPE_IMG)
+                                showFullImg(entity.file_name);
+                            else if(entity.chat_type == CSProto.CHAT_MSG_TYPE_MP4)
+                                showVideo(entity.file_name);
+                            else {
+                                //nothing
+                            }
                         default:
                             break;
                     }
                 }
             };
+
+            View.OnLongClickListener long_listener = new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    onLongClickChat(position);
+                    return  true;
+                }
+            };
+
 
             chatHolder.timeTextView.setText(entity.chatTime);
 //            chatHolder.contentTextView.setText(chatList.get(position).getContent());
@@ -344,9 +418,10 @@ public class ChatDetailActivity extends Activity {
             chatHolder.contentTextView.setText(sp);
             chatHolder.contentTextView.setTextColor(getResources().getColor(R.color.bg_midnight_blue_lighter));
             //chatHolder.contentTextView.setOnClickListener(listener);
-            chatHolder.userImageView.setImageResource(entity.userImage);
+            //chatHolder.userImageView.setImageDrawable(null);
             chatHolder.userTextView.setText(entity.userName);
             chatHolder.contentImageView.setImageDrawable(null); //clear bitmap to transparent
+            chatHolder.durationTextView.setVisibility(View.GONE);
             //Image
             if(entity.chat_type == CSProto.CHAT_MSG_TYPE_IMG) {
                 chatHolder.contentTextView.setVisibility(View.GONE);
@@ -359,33 +434,46 @@ public class ChatDetailActivity extends Activity {
                 } else {
                     chatHolder.contentImageView.setImageDrawable(getResources().getDrawable(R.drawable.shape_chat_img_default));
                 }
-                /*
-                if(entity.bmp_content != null) {
-                    chatHolder.contentImageView.setImageBitmap(entity.bmp_content);
-                } else {    //load img
-                    if(entity.file_name!=null && entity.file_name.length()>0)
-                        TryLoadChatImg(entity.msg_id , entity.content , entity.file_name);
-                }*/
-            } else {
+            } else if(entity.chat_type==CSProto.CHAT_MSG_TYPE_MP4) { //VIDEO
+                chatHolder.contentTextView.setVisibility(View.GONE);
+                chatHolder.contentImageView.setVisibility(View.VISIBLE);
+                chatHolder.durationTextView.setVisibility(View.VISIBLE);
+                chatHolder.durationTextView.setText("");
+                if(!TextUtils.isEmpty(entity.file_name)) {
+                    if(entity.bmp_content != null) { //load snap short
+                        chatHolder.contentImageView.setImageDrawable(null);
+                        Log.d(log_label , "mp4 snap ready! file:" + entity.file_name + " duration:" + entity.video_time);
+                        chatHolder.contentImageView.setImageBitmap(entity.bmp_content);
+                        chatHolder.durationTextView.setText(AppConfig.VideoTimeStr(entity.video_time));
+                    } else {
+                        TryLoadVideoFile(entity.msg_id, entity.content, entity.file_name);
+                    }
+
+                } else
+                    chatHolder.contentImageView.setImageDrawable(getResources().getDrawable(R.drawable.video_bak));
+            } else { //TEXT
                 chatHolder.contentTextView.setVisibility(View.VISIBLE);
                 chatHolder.contentImageView.setVisibility(View.GONE);
+                entity.bmp_content = null; //set nil
+                Drawable drawable=(chatHolder.contentImageView).getDrawable();
+                if(drawable instanceof BitmapDrawable){
+                    Bitmap bmp = ((BitmapDrawable)drawable).getBitmap();
+                    if (bmp != null && !bmp.isRecycled()){
+                        (chatHolder.contentImageView).setImageDrawable(null);
+                        bmp.recycle();
+                        Log.d("chat_adapter" , "will recycle ImageView Bitmap");
+                        bmp=null;
+                    }
+                }
             }
             chatHolder.contentImageView.setOnClickListener(listener);
+            chatHolder.contentImageView.setOnLongClickListener(long_listener);
             if(entity.uid == UserInfo.SYS_UID) {
                 chatHolder.contentTextView.setTextColor(getResources().getColor(R.color.bg_main_head_font_body));
                 chatHolder.userTextView.setText("系统");
             }
             //special
             switch ((int) entity.chat_flag) {
-                /*
-                case (int) ChatInfo.CHAT_FLAG_CANCELLER:
-                    Log.d(log_label , "canceller msg_id:" + entity.msg_id);
-                    chatHolder.contentTextView.setVisibility(View.GONE);
-                    chatHolder.contentImageView.setVisibility(View.GONE);
-                    chatHolder.timeTextView.setVisibility(View.GONE);
-                    chatHolder.userTextView.setVisibility(View.GONE);
-                    break;
-                 */
                 case (int) ChatInfo.CHAT_FLAG_CANCELED:
                     //Log.d(log_label , "cancelled msg_id:" + entity.msg_id);
                     chatHolder.contentTextView.setTextColor(getResources().getColor(R.color.bg_main_head_font_body));
@@ -406,6 +494,7 @@ public class ChatDetailActivity extends Activity {
             private ImageView userImageView;
             private TextView contentTextView;
             private ImageView contentImageView;
+            private TextView durationTextView;
         }
 
     }
@@ -438,35 +527,52 @@ public class ChatDetailActivity extends Activity {
         img_dialog.show();
     }
 
+    private void showVideo(String file_name) {
+        String file_path = AppConfig.getNormalChatFilePath(grp_id , file_name);
+        if(TextUtils.isEmpty(file_path)) {
+            AppConfig.PrintInfo(this , "视频文件为空");
+            return;
+        }
+
+        Intent intent = new Intent("VideoPlay");
+        intent.putExtra("file" , file_path);
+        startActivity(intent);
+        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+    }
+
 
     private void showFullImg(String file_name) {
+        /*
         AlertDialog img_dialog;
         LayoutInflater inflater;
         View content_view;
-        ImageView iv_large;
-        Bitmap bmp_img;
+        ZoomableImageView iv_large;
 
-
+         */
+        //Bitmap bmp_img;
+        /*
         //创建对话框
         img_dialog = new AlertDialog.Builder(ChatDetailActivity.this).create();
 
         //加载布局并获得相关widget
         inflater = LayoutInflater.from(ChatDetailActivity.this);
-        content_view = inflater.inflate(R.layout.dialog_photo_entry, null);
-        iv_large = (ImageView) content_view.findViewById(R.id.iv_large_dig_photo_entry);
+        content_view = inflater.inflate(R.layout.dialog_chat_image_entry, null);
+        iv_large = (ZoomableImageView) content_view.findViewById(R.id.iv_chat_image_entry);
+
+         */
 
         //load from local
-        bmp_img = AppConfig.ReadLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , file_name);
-        if(bmp_img == null)
+        chat_img_origion = AppConfig.ReadLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , file_name);
+        if(chat_img_origion == null)
         {
             AppConfig.PrintInfo(ChatDetailActivity.this, "还没有图片");
             return;
         }
 
-        iv_large.setImageBitmap(bmp_img);
+        iv_large.setImageBitmap(chat_img_origion);
 
         //显示dialog
-        img_dialog.setView(content_view);
+        //img_dialog.setView(content_view);
         img_dialog.show();
     }
 
@@ -479,6 +585,60 @@ public class ChatDetailActivity extends Activity {
             ll_face_panel.setVisibility(View.GONE);
         else
             ll_face_panel.setVisibility(View.VISIBLE);
+    }
+
+    public void onChooseVideoClick(View v) {
+        //弹出对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(ChatDetailActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(ChatDetailActivity.this);
+        View root_v = inflater.inflate(R.layout.normal_dialog , null);
+        TextView tv_title = (TextView)root_v.findViewById(R.id.tv_normal_dialog_title);
+        tv_title.setText("请选择");
+        Button bt_ok = (Button)root_v.findViewById(R.id.bt_normal_dialog_ok);
+        bt_ok.setText("视频");
+        Button bt_cancel = (Button)root_v.findViewById(R.id.bt_normal_dialog_cancel);
+        bt_cancel.setText("清除");
+        final Dialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setContentView(root_v);
+
+
+        //ok
+        bt_ok.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v)
+            {
+                //create
+                dialog.dismiss();
+                AppConfig.PrintInfo(getBaseContext(), "选择视频");
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT,null);
+                intent.setType("video/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                try
+                {
+                    startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的视频"), AppConfig.FILE_SELECT_VIDEO);
+                }
+                catch (android.content.ActivityNotFoundException ex)
+                {
+                    // Potentially direct the user to the Market with a Dialog
+                }
+            }
+        });
+
+        //cancel
+        bt_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //nothing
+                dialog.dismiss();
+                //reset
+                update_video_url_str = "";
+
+                //show text
+                DialogDisplayText();
+            }
+        });
+
+
     }
 
     public void onImgClick(View v) {
@@ -506,7 +666,7 @@ public class ChatDetailActivity extends Activity {
                 AppConfig.PrintInfo(getBaseContext(), "选择图片");
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT,null);
 //				intent.setType("image/*");
-                intent.setType("*/*");
+                intent.setType("image/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 try
                 {
@@ -525,14 +685,14 @@ public class ChatDetailActivity extends Activity {
             public void onClick(View view) {
                 //nothing
                 dialog.dismiss();
-                if(bmp_img == null)
+                if(bmp_upload_img == null)
                 {
                     AppConfig.PrintInfo(ChatDetailActivity.this, "还没有选择图片");
                     return;
                 }
 
                 //reset
-                bmp_img = null;
+                bmp_upload_img = null;
 
                 //show text
                 DialogDisplayText();
@@ -540,79 +700,18 @@ public class ChatDetailActivity extends Activity {
         });
     }
 
-
-    public void onImgClickBak(View v)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("选择图片来源");
-
-        builder.setPositiveButton("图库", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-                AppConfig.PrintInfo(getBaseContext(), "选择图片");
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT,null);
-//				intent.setType("image/*");
-                intent.setType("*/*");
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                try
-                {
-                    startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), AppConfig.FILE_SELECT_CODE);
-                }
-                catch (android.content.ActivityNotFoundException ex)
-                {
-                    // Potentially direct the user to the Market with a Dialog
-                }
-            }
-        });
-
-        builder.setNegativeButton("相机", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-                Intent intent = new Intent();
-
-                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.addCategory(Intent.CATEGORY_DEFAULT);
-                startActivityForResult(intent, AppConfig.USE_CAM_CODE);
-            }
-        });
-
-        //踩
-        builder.setNeutralButton("清除", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton)
-            {
-
-                if(bmp_img == null)
-                {
-                    AppConfig.PrintInfo(ChatDetailActivity.this, "还没有选择图片");
-                    return;
-                }
-
-                //reset
-                bmp_img = null;
-
-                //show text
-                DialogDisplayText();
-            }
-        });
-
-        builder.create().show();
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
+        String log_label = "onActivityResult";
         Bitmap bmp_get = null;
         super.onActivityResult(requestCode, resultCode, intent);
-        if(resultCode != RESULT_OK)
+        if(resultCode != RESULT_OK) {
+            AppConfig.PrintInfo(this , "选择文件失败");
+            Log.e(log_label , "result failed! code:" + resultCode);
             return;
-
+        }
 
         switch(requestCode)
         {
@@ -652,19 +751,35 @@ public class ChatDetailActivity extends Activity {
                 }
                 catch (FileNotFoundException e)
                 {
-                    // TODO Auto-generated catch block
+
                     e.printStackTrace();
                 }
                 catch (IOException e)
                 {
-                    // TODO Auto-generated catch block
+
                     e.printStackTrace();
                 }
                 break;
-            case AppConfig.FILE_CROP_CODE:
-                Bitmap bmp_tmp = intent.getParcelableExtra("data");
-                bmp_get = AppConfig.compressImage(bmp_tmp, AppConfig.UPLOAD_FILE_SIZE/1024);
-                break;
+            case AppConfig.FILE_SELECT_VIDEO:
+                uri = intent.getData();
+                if(uri == null) {
+                    Log.e(log_label , "choose video but uri null!");
+                    break;
+                }
+                Log.d(log_label , "video uri:" + uri.toString());
+                cr = getContentResolver();
+                try {
+                    InputStream is_tmp;
+                    is_tmp = cr.openInputStream(uri);
+    				Log.d(log_label, "video size:" + is_tmp.available()/1024 + "kb");
+                    //AppConfig.TryNotifyImgSize(this, is_tmp.available());
+                    is_tmp.close();
+                    update_video_url_str = uri.toString();
+                    DialogDisplayVideo();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
             default:
                 break;
         }
@@ -674,12 +789,40 @@ public class ChatDetailActivity extends Activity {
             return;
 
         //set bitmap
-        bmp_img = bmp_get;
+        bmp_upload_img = bmp_get;
         DialogDisplayImage();
     }
 
+    private void DialogDisplayVideo() {
+        String log_label = "DialogDisplayVideo";
+        //show text
+        //handle
+        TextView tv_send = (TextView)dialog.findViewById(R.id.send_dialog_content);
+        tv_send.setVisibility(View.GONE);
+        //set words
+        /*
+        String words[] = update_video_url_str.split("/");
+        String title = "[[视频]]" + words[words.length-1];
+        tv_send.setText(title);
+         */
+        ImageView iv_send = (ImageView) dialog.findViewById(R.id.send_dialog_iv_content);
+        iv_send.setVisibility(View.VISIBLE);
+        iv_send.setImageDrawable(null);
+
+        //Get Bitmap
+        Uri uri = Uri.parse(update_video_url_str);
+        Bitmap video_bmp = createVideoThumbnail(uri);
+        if(video_bmp == null) {
+            AppConfig.PrintInfo(this , "格式错误，无法上传");
+            return;
+        }
+        iv_send.setImageBitmap(video_bmp);
+        send_type = CSProto.CHAT_MSG_TYPE_MP4;
+    }
+
+
     private void DialogDisplayImage() {
-        if(bmp_img == null)
+        if(bmp_upload_img == null)
             return;
         if(dialog == null)
             return;
@@ -690,11 +833,12 @@ public class ChatDetailActivity extends Activity {
 
         ImageView iv_send = (ImageView) dialog.findViewById(R.id.send_dialog_iv_content);
         iv_send.setVisibility(View.VISIBLE);
-        iv_send.setImageBitmap(bmp_img);
+        iv_send.setImageBitmap(bmp_upload_img);
         send_type = CSProto.CHAT_MSG_TYPE_IMG;
     }
 
     private void DialogDisplayText() {
+        String log_label = "DialogDisplayText";
         if(dialog == null)
             return;
 
@@ -705,6 +849,8 @@ public class ChatDetailActivity extends Activity {
         ImageView iv_send = (ImageView) dialog.findViewById(R.id.send_dialog_iv_content);
         iv_send.setVisibility(View.GONE);
         iv_send.setBackgroundResource(R.color.bg_bak_trans);
+        bmp_upload_img = null;
+        iv_send.setImageDrawable(null);
         send_type = CSProto.CHAT_MSG_TYPE_TEXT;
     }
 
@@ -781,6 +927,15 @@ public class ChatDetailActivity extends Activity {
             }
         });
 
+        ImageView iv_choose_video = (ImageView)dialog.findViewById(R.id.iv_send_dialog_choose_video);
+        iv_choose_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onChooseVideoClick(view);
+            }
+        });
+
+
         //choose emoji and listener
         ImageView iv_default_emoji = (ImageView)dialog.findViewById(R.id.iv_send_dialog_default_emoji);
         iv_default_emoji.setOnClickListener(new View.OnClickListener() {
@@ -795,8 +950,8 @@ public class ChatDetailActivity extends Activity {
         iv_show_send_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(bmp_img != null)
-                    showFullImg(bmp_img);
+                if(bmp_upload_img != null)
+                    showFullImg(bmp_upload_img);
             }
         });
 
@@ -813,6 +968,16 @@ public class ChatDetailActivity extends Activity {
         });
 
         dialog.show();
+        //bottom
+        /*
+        Window window = dialog.getWindow();
+        window.setGravity(Gravity.BOTTOM);
+        WindowManager m = getWindowManager();
+        Display d = m.getDefaultDisplay(); //为获取屏幕宽、高
+        WindowManager.LayoutParams p = dialog.getWindow().getAttributes(); //获取对话框当前的参数值
+        p.width = d.getWidth(); //宽度设置为屏幕
+        dialog.getWindow().setAttributes(p); //设置生效
+         */
     }
 
     private void send_chat() {
@@ -831,9 +996,49 @@ public class ChatDetailActivity extends Activity {
                 break;
             }
 
+            //send video
+            if(send_type == CSProto.CHAT_MSG_TYPE_MP4) {
+                send_chat_video();
+                //reset
+                DialogDisplayText();
+                break;
+            }
+
+
+
         }while (false);
     }
 
+    private void send_chat_video() {
+        String log_label = "send_chat_video";
+        if(dialog == null) {
+            Log.e(log_label , "dialog null");
+            AppConfig.PrintInfo(this , "发送出错");
+            return;
+        }
+
+        if(TextUtils.isEmpty(update_video_url_str)) {
+            Log.e(log_label , "video url null");
+            AppConfig.PrintInfo(this , "视频为空");
+            return;
+        }
+
+        //upload
+        //Get Random FileAddr
+        file_serv_info = AppConfig.GetFileServ(-1);
+        if(file_serv_info == null) {
+            Log.e(log_label , "get file serv failed!");
+            AppConfig.PrintInfo(this , "系统错误");
+            return;
+        }
+
+        //Send Chat Img
+        String upload_query = AppConfig.FileAddr2UploadUrl(file_serv_info.Addr);
+        new UpdateChatVideoTask().execute(upload_query);
+
+        //hide
+        dialog.dismiss();
+    }
 
     private void send_chat_img() {
         String log_label = "send_chat_img";
@@ -843,7 +1048,7 @@ public class ChatDetailActivity extends Activity {
             return;
         }
 
-        if(bmp_img == null) {
+        if(bmp_upload_img == null) {
             Log.e(log_label , "img null");
             AppConfig.PrintInfo(this , "图片为空");
             return;
@@ -934,7 +1139,8 @@ public class ChatDetailActivity extends Activity {
                     ret = LoadOlderItem(grp_id , flag);
                     break;
                 case LOAD_FLAG_NEW:
-                    ret = LoadNewItem(grp_id);
+                case LOAD_FLAG_CRAETE_NEW:
+                    ret = LoadNewItem(grp_id , flag);
                     break;
                 default:
                     break;
@@ -953,8 +1159,14 @@ public class ChatDetailActivity extends Activity {
 
     private int LoadOlderItem(long grp_id , int flag) throws SQLException {
         String log_label = "LoadOlderItem";
-        long oldest_msg_id = UserInfo.GetGrpOldetMsgId(grp_id);
-        long latest_msg_id = UserInfo.GetGrpLatestMsgId(grp_id);
+        UserChatGroup u_grp = UserInfo.getChatGrp(grp_id);
+        if(u_grp == null) {
+            Log.e(log_label , "grp info nil! grp_id:" + grp_id);
+            return 0;
+        }
+        long server_lastest_msg_id = u_grp.serv_last_msg_id;
+        long oldest_msg_id = u_grp.oldest_msg_id;
+        long latest_msg_id = u_grp.local_last_msg_id;
         Log.d(log_label , "grp_id:" + grp_id + " flag:" + flag + " oldest:" + oldest_msg_id + " latest:" + latest_msg_id);
         int item_count = 0;
         long last_display_ts = 0;
@@ -1016,7 +1228,7 @@ public class ChatDetailActivity extends Activity {
             chat.chat_flag = c.getLong(c.getColumnIndex("flag"));
             chat.chat_type = c.getInt(c.getColumnIndex("chat_type"));
             //get file_name
-            if(chat.chat_type == CSProto.CHAT_MSG_TYPE_IMG && chat.content.length()>0) {
+            if(chat.chat_type != CSProto.CHAT_MSG_TYPE_TEXT  && chat.content.length()>0) {
                 chat.file_name = AppConfig.Url2RealFileName(chat.content);
             }
             if(chat.chat_type > AppConfig.CURRENT_SUPPORT_CHAT_TYPE) {
@@ -1044,11 +1256,23 @@ public class ChatDetailActivity extends Activity {
         Log.d(log_label , "oldest_msg_id:" + oldest_msg_id);
 
         //check lost
+        long recover_lost = 0;
         if(flag==LOAD_FLAG_CREATE && ((query_start_msg_id-oldest_msg_id + 1) != item_count)) { //should start-oldest + 1 == item_count
             Log.i(log_label , "some message lost! start:" + query_start_msg_id + " end:" + oldest_msg_id + " count:" + item_count);
-            String query = CSProto.CSChatHistoryReq(grp_id , query_start_msg_id);
+            recover_lost = query_start_msg_id;
+            //String query = CSProto.CSChatHistoryReq(grp_id , query_start_msg_id);
+            //AppConfig.SendMsg(query);
+        }
+        if(server_lastest_msg_id>0 && latest_msg_id != server_lastest_msg_id) {
+            Log.i(log_label , "local and serer last_msg not match! will recover from server! local_last:" + latest_msg_id + " server_last:"+ server_lastest_msg_id);
+            recover_lost = server_lastest_msg_id + 1;
+        }
+        if(recover_lost > 0) {
+            Log.i(log_label , "will recover from his! recover:" + recover_lost);
+            String query = CSProto.CSChatHistoryReq(grp_id , recover_lost , 10);
             AppConfig.SendMsg(query);
         }
+
 
         return item_count;
     }
@@ -1069,8 +1293,8 @@ public class ChatDetailActivity extends Activity {
         }
     }
 
-    private int LoadNewItem(long grp_id) throws SQLException {
-        String log_label = "LoadOlderItem";
+    private int LoadNewItem(long grp_id , int flag) throws SQLException {
+        String log_label = "LoadNewItem";
         UserChatGroup grp_info = UserInfo.getChatGrp(grp_id);
         long latest_msg_id = grp_info.local_last_msg_id;
         String latest_msg = "";
@@ -1085,7 +1309,7 @@ public class ChatDetailActivity extends Activity {
         String tab_name = DBHelper.grp_id_2_tab_name(grp_id);
         String sql =  "SELECT * FROM " + tab_name + " WHERE grp_id=" + grp_id + " AND msg_id>" + latest_msg_id
                 + " ORDER BY msg_id ASC"; //new msg id
-        Log.d(log_label , "sql:" + sql);
+        Log.d(log_label , "flag:" + flag + " sql:" + sql);
         int src_pos = chatList.size() - 1;
         if(src_pos < 0)
             src_pos = 0;
@@ -1135,7 +1359,7 @@ public class ChatDetailActivity extends Activity {
             chat.userName = c.getString(c.getColumnIndex("snd_name"));
             chat.uid = c.getLong(c.getColumnIndex("snd_uid"));
             //get file_name
-            if(chat.chat_type == CSProto.CHAT_MSG_TYPE_IMG && chat.content.length()>0) {
+            if(chat.chat_type != CSProto.CHAT_MSG_TYPE_TEXT && chat.content.length()>0) {
                 chat.file_name = AppConfig.Url2RealFileName(chat.content);
             }
 
@@ -1165,8 +1389,86 @@ public class ChatDetailActivity extends Activity {
                 grp_info.serv_last_msg_id = latest_msg_id;
             }
         }
+        //recover
+        if(grp_info.serv_last_msg_id > grp_info.local_last_msg_id) {
+            Log.i(log_label , "local and server last not match! local:" + grp_info.local_last_msg_id + " server:" + grp_info.serv_last_msg_id);
+            String query = CSProto.CSChatHistoryReq(grp_id , grp_info.serv_last_msg_id+1 , (int) (grp_info.serv_last_msg_id-grp_info.local_last_msg_id+5));
+            AppConfig.SendMsg(query);
+        }
+
+
         chatListView.setSelection(src_pos);	//src pos
         Log.d(log_label , "latest_msg_id:" + latest_msg_id);
+
+        //no need to load history
+        if(flag != LOAD_FLAG_CRAETE_NEW)
+            return item_count;
+
+        Log.i(log_label , "create_new will load history!");
+        //load history
+        long oldest_msg_id = u_grp.oldest_msg_id;
+        sql =  "SELECT * FROM " + tab_name + " WHERE grp_id=" + grp_id + " and msg_id<=" + oldest_msg_id + " ORDER BY msg_id DESC limit 30"; //latest 40 chat
+        Log.d(log_label , "flag:" + flag + " sql:" + sql);
+        c = AppConfig.db.rawQuery(sql, null);
+        if(c == null) {
+            return 0;
+        }
+        while (c.moveToNext())
+        {
+            ChatEntity chat = new ChatEntity();
+
+            //SET ENTITY
+            int is_from = c.getInt(c.getColumnIndex("is_from"));
+            if(is_from == 1)
+                chat.setComeMsg(true);
+            else
+                chat.setComeMsg(false);
+            long msg_id = c.getLong(c.getColumnIndex("msg_id"));
+            chat.msg_id = msg_id;
+            if(msg_id < oldest_msg_id) {
+                oldest_msg_id = msg_id;
+            }
+
+            snd_ts = c.getLong(c.getColumnIndex("snd_time"));
+            if(AppConfig.ChatTimeInSpan(snd_ts , last_display_ts) == false) {
+                chat.chatTime = AppConfig.ConverUnixTime2MinStr(snd_ts);
+                last_display_ts = snd_ts;
+            }
+            String enc_content = c.getString(c.getColumnIndex("chat_content"));
+            String dec_content = DBHelper.DecryptChatContent(enc_content , AppConfig.user_local_des_key);
+            if(TextUtils.isEmpty(dec_content)) {
+                Log.e(log_label , "decrypt content failed! msg_id:" + msg_id);
+                continue;
+            }
+
+            chat.content = dec_content;
+            chat.userName = c.getString(c.getColumnIndex("snd_name"));
+            chat.uid = c.getLong(c.getColumnIndex("snd_uid"));
+            chat.chat_flag = c.getLong(c.getColumnIndex("flag"));
+            chat.chat_type = c.getInt(c.getColumnIndex("chat_type"));
+            //get file_name
+            if(chat.chat_type != CSProto.CHAT_MSG_TYPE_TEXT && chat.content.length()>0) {
+                chat.file_name = AppConfig.Url2RealFileName(chat.content);
+            }
+            if(chat.chat_type > AppConfig.CURRENT_SUPPORT_CHAT_TYPE) {
+                chat.content = "当前版本不支持该消息";
+            }
+            //Log.d(log_label , "msg_id:" + msg_id + " content:" + chat.content + " flag:" + chat.chat_flag);
+            //Insert
+            if(chat.chat_flag != ChatInfo.CHAT_FLAG_CANCELLER && chat.chat_flag != ChatInfo.CHAT_FLAG_DEL)
+                chatList.add(0 , chat);
+        }
+        //modify
+        item_count = c.getCount();
+        c.close();
+
+        //update some
+        if(item_count > 0)
+        {
+            chatAdapter.notifyDataSetChanged();
+            u_grp.oldest_msg_id = oldest_msg_id;
+        }
+        chatListView.setSelection(chatList.size()-1);
         return item_count;
     }
 
@@ -1321,8 +1623,9 @@ public class ChatDetailActivity extends Activity {
                 Log.d(log_label , "CheckChatMsg starts");
 
                 //wait result
-                while (check_chat) {
-                    try {
+                try {
+                    Thread.sleep(2000); //first sleep 2s
+                    while (check_chat) {
                         Thread.sleep(300);
 
                         //get lock sould not locked
@@ -1338,11 +1641,9 @@ public class ChatDetailActivity extends Activity {
                                 LoadChatItem(grp_id , LOAD_FLAG_NEW);
                             }
                         });
-
-
-                    } catch (InterruptedException b) {
-                        b.printStackTrace();
                     }
+                } catch (InterruptedException b) {
+                    b.printStackTrace();
                 }
                 Log.d(log_label , "CheckChatMsg exit!");
             }
@@ -1382,7 +1683,7 @@ public class ChatDetailActivity extends Activity {
                         break;
                     }*/
                 } while (false);
-                String req = CSProto.CSChatHistoryReq(grp_id , query_msg_id);
+                String req = CSProto.CSChatHistoryReq(grp_id , query_msg_id , 0);
                 AppConfig.SendMsg(req);
                 int v = 0;
                 //wait rsp
@@ -1433,6 +1734,25 @@ public class ChatDetailActivity extends Activity {
         new LoadFileTask().execute(img_query , Long.toString(msg_id) , file_name);
     }
 
+    private void TryLoadVideoFile(long msg_id , String chat_url , String file_name) {
+        String log_label = "TryLoadVideoFile";
+        //arg check
+        if(msg_id<=0 || chat_url==null || chat_url.length()<=0 || file_name==null || file_name.length()<=0) {
+            Log.e(log_label , "arg illegal!");
+            return;
+        }
+
+        //get query
+        String file_query = AppConfig.ParseServerUrl(chat_url);
+        if(file_query==null || file_query.length()<=0) {
+            Log.e(log_label , "parse chat_url failed!");
+            return;
+        }
+        Log.d(log_label , "file_query:" + file_query + " file_name:" + file_name);
+        //query
+        new LoadVideoFileTask().execute(file_query , Long.toString(msg_id) , file_name);
+    }
+
 
     private void SetMsgImg(long msg_id , Bitmap bmp_content) {
         String log_label = "SetMsgImg";
@@ -1456,6 +1776,38 @@ public class ChatDetailActivity extends Activity {
 
         return;
     }
+
+    private void SetMsgVideo(long msg_id , Bitmap bmp_snap , long video_time) {
+        String log_label = "SetMsgVideo";
+        //check
+        if(msg_id<=0) {
+            Log.e(log_label , "arg null");
+            return;
+        }
+
+        //get
+        ChatEntity entity = null;
+        for(int i=0; i<chatList.size(); i++) {
+            entity = chatList.get(i);
+            if(entity.msg_id == msg_id) {
+                Log.d(log_label , "found msg_id:" + msg_id + " time:" + video_time);
+                //get file_path
+                String file_path = AppConfig.getNormalChatFilePath(grp_id , entity.file_name);
+                if(TextUtils.isEmpty(file_path)) {
+                    Log.e(log_label , "file_path illegal! file_path:" + file_path);
+                } else {
+                    Log.i(log_label , "file_path done! file_path:" + file_path);
+                    entity.bmp_content = bmp_snap;
+                    entity.video_time = video_time/1000; //ms --> second
+                    chatAdapter.notifyDataSetChanged();
+                }
+                break;
+            }
+        }
+
+        return;
+    }
+
 
     //compress src bitmap to standard size
     private Bitmap AdaptChatImage(Bitmap bmp_src) {
@@ -1489,6 +1841,120 @@ public class ChatDetailActivity extends Activity {
 
         return bmp_dest;
     }
+
+
+    /*
+     * Load from Local or Load from Net exclude image
+     * HTTPSTRINGYTASK
+     */
+    private class LoadVideoFileTask extends AsyncTask<String, Void, byte[]>
+    {
+        private long msg_id = 0;
+        private String file_name = "";
+        private boolean from_local = false;
+        private String log_label = "LoadVideoFileTask";
+        private Bitmap video_bmp = null; //snap
+        String file_path = "";
+        private long video_time = 0;
+        @Override
+        protected byte[] doInBackground(String... params)
+        {
+            InputStream input_stream = null;
+            msg_id = Long.parseLong(params[1]);
+            file_name = params[2];
+            byte[] data = null;
+            try
+            {
+                //first check from local
+                file_path = AppConfig.getNormalChatFilePath(grp_id , file_name);
+                if(!TextUtils.isEmpty(file_path)) {
+                    Log.d(log_label , "file exist! file_path:" + file_path);
+                    video_time = getVideoDurationLong(file_path);
+                    //load from local snap
+                    video_bmp = AppConfig.ReadLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , AppConfig.VideoSnapName(file_name));
+                    if(video_bmp == null) {
+                        video_bmp = createVideoThumbnail(file_path);
+                        Bitmap bmp_compressed = AdaptChatImage(video_bmp);
+                        AppConfig.saveLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , bmp_compressed , AppConfig.VideoSnapName(file_name));
+                    }
+                    from_local = true;
+                    return null;
+                }
+
+                Log.d(log_label , "load from net! file:" + file_name);
+                /*open connection*/
+                URL url = new URL(params[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(10 * 1000);
+                conn.setAllowUserInteraction(false);
+                conn.setInstanceFollowRedirects(true);
+                conn.setRequestMethod("GET");
+
+                if(conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+                {
+                    input_stream = conn.getInputStream();
+                    data = AppConfig.ReadInput2Bytes(input_stream);
+                }
+
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return data;
+        }
+
+        @Override
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         * result形式:
+         * [01](&time:tag:author)*
+         */
+        protected void onPostExecute(byte[] data)
+        {
+
+            if(data == null) {
+                if(from_local && video_bmp != null) //from local
+                    SetMsgVideo(msg_id , video_bmp , video_time);
+                return;
+            }
+
+            /*Parse BITMAP*/
+            try
+            {
+                if(data != null)
+                {
+                    if(!from_local) { //from net will save to local
+                        Log.i(log_label, "download file done");
+                        AppConfig.saveNormalChatFile(grp_id , data , file_name);
+                        //set snap
+                        file_path = AppConfig.getNormalChatFilePath(grp_id , file_name);
+                        video_time = getVideoDurationLong(file_path);
+                        video_bmp = createVideoThumbnail(file_path);
+                        if(video_bmp != null) {
+                            Bitmap bmp_compressed = AdaptChatImage(video_bmp);
+                            AppConfig.saveLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , bmp_compressed , AppConfig.VideoSnapName(file_name));
+                            //AppConfig.saveLocalImg(AppConfig.LOCAL_IMG_CHAT , grp_id , video_bmp , AppConfig.VideoSnapName(file_name));
+                            SetMsgVideo(msg_id, bmp_compressed , video_time);
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 
 
     /*
@@ -1574,8 +2040,10 @@ public class ChatDetailActivity extends Activity {
                     }
                     //convert to small bitmap
                     Bitmap bmp_compressed = AdaptChatImage(bmp_chat);
-                    if(bmp_compressed != null)
-                        SetMsgImg(msg_id , bmp_compressed);
+                    if(bmp_compressed != null) {
+                        SetMsgImg(msg_id, bmp_compressed);
+                        bmp_chat = null;
+                    }
                     else
                         SetMsgImg(msg_id , bmp_chat);
                 }
@@ -1587,6 +2055,119 @@ public class ChatDetailActivity extends Activity {
         }
 
     }
+
+
+    /*
+     * Task
+     */
+    private class UpdateChatVideoTask extends AsyncTask<String, Void, String>
+    {
+        String log_label = "UpdateChatVideoTask";
+        InputStream input_stream = null;
+        @Override
+        protected String doInBackground(String... params)
+        {
+            String result = null;
+            if(file_serv_info == null) {
+                Log.e(log_label , "file_serv_info null!");
+                return null;
+            }
+
+            if(TextUtils.isEmpty(update_video_url_str)) {
+                Log.e(log_label , "video_url_str null!");
+                return null;
+            }
+
+            try
+            {
+                //open inputstream
+                InputStream video_is = null;
+                Uri uri = Uri.parse(update_video_url_str);
+                video_is = getContentResolver().openInputStream(uri);
+                if(video_is == null) {
+                    Log.e(log_label , "video_is null! url:" + update_video_url_str);
+                    return null;
+                }
+
+                /*open connection*/
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("url_type", AppConfig.URL_TYPE_CHAT);
+                map.put("uid", AppConfig.UserUid);
+                map.put("grp_id", grp_id);
+                map.put("tmp_id", 111);
+                map.put("token", file_serv_info.Token);
+
+                ArrayList<InputStream> is_list = new ArrayList<InputStream>();
+                is_list.add(video_is);
+
+                input_stream = AppConfig.uploadFile(params[0] , map , is_list);
+                if(input_stream == null)
+                {
+                    return null;
+                }
+
+                /*read input*/
+                result = AppConfig.ReadInputStream(input_stream);
+                input_stream.close();
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        @Override
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         * result形式:
+         * [01](&time:tag:author)*
+         */
+        protected void onPostExecute(String result)
+        {
+//			progress_dialog.dismiss();
+            if(progress_dialog != null)
+                progress_dialog.dismiss();
+
+
+            Log.d(log_label, "result:" + result);
+            if(result == null || result.length()<=0)
+            {
+                return ;
+            }
+
+            /*Parse JSON*/
+            try
+            {
+                JSONTokener parser = new JSONTokener(result);
+
+                //1.get root
+                JSONObject root = (JSONObject)parser.nextValue();
+
+                //2.get ret
+                if(root.getInt("result") == CSProto.COMMON_RESULT_SUCCESS)
+                {
+                    AppConfig.PrintInfo(getBaseContext(), "发送成功");
+                }
+                else
+                {
+                    AppConfig.PrintInfo(getBaseContext(), "发送失败");
+                }
+                return;
+
+            }
+            catch(JSONException e)
+            {
+                e.printStackTrace();
+            }
+
+
+        }
+
+    }
+
 
 
     /*
@@ -1604,20 +2185,20 @@ public class ChatDetailActivity extends Activity {
                 Log.e(log_label , "file_serv_info null!");
                 return null;
             }
-            if(bmp_img==null) {
+            if(bmp_upload_img==null) {
                 Log.e(log_label , "bmp_img null!");
                 return null;
             }
 
             //InputStream img_is = AppConfig.Bitmap2IS(bmp_img , 70);
             InputStream img_is = null;
-            if(bmp_img.getByteCount() > AppConfig.MAX_IMG_SIZE) {
-                int scale = AppConfig.MAX_IMG_SIZE * 100 / bmp_img.getByteCount();
+            if(bmp_upload_img.getByteCount() > AppConfig.MAX_IMG_SIZE) {
+                int scale = AppConfig.MAX_IMG_SIZE * 100 / bmp_upload_img.getByteCount();
                 Log.i(log_label , "will compress scale:" + scale);
-                img_is = AppConfig.Bitmap2IS(bmp_img, scale);
+                img_is = AppConfig.Bitmap2IS(bmp_upload_img, scale);
             }
             else
-                img_is = AppConfig.Bitmap2IS(bmp_img , 100);
+                img_is = AppConfig.Bitmap2IS(bmp_upload_img , 100);
             if(img_is == null) {
                 Log.e(log_label , "img_is null!");
                 return null;
@@ -1732,6 +2313,82 @@ public class ChatDetailActivity extends Activity {
 
         //load
         new LoadGroupHeadTask().execute(head_query , head_file_name);
+    }
+
+    //获取视频长度ms
+    private long getVideoDurationLong(String file_path){
+        String log_label = "getVideoDurationLong";
+        String duration = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            if(TextUtils.isEmpty(file_path)) {
+                Log.e(log_label , "file_path illegal! file_path:" + file_path);
+                return 0;
+            }
+            Uri uri = Uri.fromFile(new File(file_path));
+            retriever.setDataSource(this , uri);
+            duration = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
+        } catch (Exception ex) {
+            Log.e(log_label, "get duration failed!");
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException ex) {
+                Log.e(log_label, "release failed");
+            }
+        }
+        if(!TextUtils.isEmpty(duration)){
+            return Long.parseLong(duration);
+        }else{
+            return 0;
+        }
+    }
+
+
+    //获取视频缩略图
+    private Bitmap createVideoThumbnail(String file_path) {
+        String log_label = "createVideoThumbnail";
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            if(TextUtils.isEmpty(file_path)) {
+                Log.e(log_label , "file_path illegal! file_path:" + file_path);
+                return null;
+            }
+
+            Uri uri = Uri.fromFile(new File(file_path));
+            retriever.setDataSource(this , uri);
+            bitmap = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_NEXT_SYNC);
+        } catch (IllegalArgumentException ex) {
+            Log.e(log_label, "failed");
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException ex) {
+                Log.e(log_label, "release res failed!");
+            }
+        }
+        return bitmap;
+    }
+
+    //获取视频缩略图
+    private Bitmap createVideoThumbnail(Uri uri) {
+        String log_label = "createVideoThumbnail2";
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(this , uri);
+            bitmap = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_NEXT_SYNC);
+        } catch (IllegalArgumentException ex) {
+            Log.e(log_label, "failed");
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException ex) {
+                Log.e(log_label, "release res failed!");
+            }
+        }
+        return bitmap;
     }
 
 

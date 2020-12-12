@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +18,8 @@ import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 public class SplashActivity extends AppCompatActivity {
     private SharedPreferences shared_data;
@@ -23,6 +27,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private EditText et_server_name;
     private EditText et_server_addr;
+    private Button btn_ok;
 
     private String server_space = "";
     private String dir_addr = "";
@@ -56,6 +61,15 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
+        if(AppConfig.IsLogin())
+            return;
+
+        //NoCheckCert
+        if(!AppConfig.HttpsCertNoCheck()) {
+            Log.e(log_label , "set https cert failed!");
+            AppConfig.PrintInfo(this , "HTTP设置错误");
+            return;
+        }
 
 
         /*create shared preference*/
@@ -63,11 +77,15 @@ public class SplashActivity extends AppCompatActivity {
         editor = shared_data.edit();
         server_space = shared_data.getString(AppConfig.KEY_SERVER_SPACE, AppConfig.ServerSpace);
         dir_addr = shared_data.getString(AppConfig.KEY_DIR_ADDR , "");
+        int req_timeout = shared_data.getInt(AppConfig.KEY_REQ_TIMEOUT , AppConfig.REQ_TIMEOUT); //or default
+        Log.d(log_label , "req_timeout set to " + req_timeout);
+        AppConfig.REQ_TIMEOUT = req_timeout;
 
         //widget
         et_server_name = (EditText)this.findViewById(R.id.splash_server_name);
         et_server_name.setHint(server_space);
         et_server_addr = (EditText)this.findViewById(R.id.splash_server_addr);
+        btn_ok = (Button)this.findViewById(R.id.bt_splash_enter);
         if(dir_addr.length() > 0)
             et_server_addr.setHint(dir_addr);
 
@@ -83,6 +101,7 @@ public class SplashActivity extends AppCompatActivity {
                 Log.d(log_label , "within login sticky! will use old conn_serv to login!");
                 AppConfig.ChatServHost = conn_serv_ip;
                 AppConfig.ChatServPort = conn_serv_port;
+                AppConfig.ServerSpace = server_space;
                 //enter main
                 Intent intent = new Intent("ChatMain");
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -104,7 +123,8 @@ public class SplashActivity extends AppCompatActivity {
 
 
         //query
-        String query = "http://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
+        btn_ok.setVisibility(View.GONE); //not now
+        String query = "https://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
         new DirIPTask().execute(query);
     }
 
@@ -124,7 +144,8 @@ public class SplashActivity extends AppCompatActivity {
                 }
 
                 //query
-                String query = "http://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
+                btn_ok.setVisibility(View.GONE); //not now
+                String query = "https://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
                 new DirIPTask().execute(query);
                 break;
             default:
@@ -148,7 +169,7 @@ public class SplashActivity extends AppCompatActivity {
             {
                 /*open connection*/
                 Log.d(log_label , "query:" + params[0]);
-                input_stream = AppConfig.openHttpConnGet(params[0]);
+                input_stream = AppConfig.openHttpsConnGet(params[0]);
                 if(input_stream == null)
                 {
                     Log.e(log_label , "input stream null");
@@ -162,6 +183,10 @@ public class SplashActivity extends AppCompatActivity {
             catch(IOException e)
             {
                 result = null;
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
                 e.printStackTrace();
             }
 
@@ -178,10 +203,11 @@ public class SplashActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String result)
         {
-            if(result == null || result.length()<=0)
+            if(TextUtils.isEmpty(result))
             {
-                Log.e(log_label , "result null");
+                Log.e(log_label , "result empty");
                 AppConfig.PrintInfo(getBaseContext() , "连接失败");
+                btn_ok.setVisibility(View.VISIBLE);
                 return ;
             }
 
@@ -200,18 +226,19 @@ public class SplashActivity extends AppCompatActivity {
                 if(conn_url==null || conn_url.length()<=0)
                 {
                     AppConfig.PrintInfo(getBaseContext(), "获取地址失败");
-                    finish();
+                    btn_ok.setVisibility(View.VISIBLE);
                     return;
                 }
                 String[] strs = conn_url.split(":");
                 if(strs.length != 2) {
                     AppConfig.PrintInfo(getBaseContext() , "解析地址失败");
-                    finish();
+                    btn_ok.setVisibility(View.VISIBLE);
                     return;
                 }
                 AppConfig.ChatServHost = strs[0];
                 AppConfig.ChatServPort = Integer.parseInt(strs[1]);
-                Log.d(log_label , "ip:" + AppConfig.ChatServHost + " port:" + AppConfig.ChatServPort);
+                AppConfig.ServerSpace = server_space;
+                Log.d(log_label , "ip:" + AppConfig.ChatServHost + " port:" + AppConfig.ChatServPort + " space:" + AppConfig.ServerSpace);
 
                 //save
                 editor.putString(AppConfig.KEY_SERVER_SPACE , server_space);
@@ -219,6 +246,7 @@ public class SplashActivity extends AppCompatActivity {
                 editor.putString(AppConfig.KEY_CONN_SERV_IP , AppConfig.ChatServHost);
                 editor.putInt(AppConfig.KEY_CONN_SERV_PORT , AppConfig.ChatServPort);
                 editor.commit();
+
 
                 //enter main
                 Intent intent = new Intent("ChatMain");
@@ -230,6 +258,7 @@ public class SplashActivity extends AppCompatActivity {
             }
             catch(JSONException e)
             {
+                btn_ok.setVisibility(View.VISIBLE);
                 e.printStackTrace();
             }
         }

@@ -109,21 +109,21 @@ public class MyEncrypt
 
     /**
      * Encrypt data to server
-     * @param encryptString
+     * @param trans_key
      * @param
      * @return
      * @throws Exception
      * RSA from openssl pkcs1padding
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static byte[] EncryptRsa(String encryptString, String rsa_pub_key) throws Exception {
+    public static byte[] EncryptRsa(byte[] trans_key, String rsa_pub_key) throws Exception {
         //get public key
         PublicKey pb_key = loadPublicKey(rsa_pub_key);
 
         //encrypt
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, pb_key);
-        byte[] encryptedData = cipher.doFinal(encryptString.getBytes("UTF-8"));
+        byte[] encryptedData = cipher.doFinal(trans_key);
         //byte[] encryptedData = cipher.doFinal(encryptString.getBytes());
         return encryptedData;
     }

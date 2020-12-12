@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -115,6 +116,15 @@ public class SpaceActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
                 break;
             case R.id.ll_space_create_group:
+                int master_group = UserInfo.MasterGroupCount();
+                if(master_group < 0) {
+                    return;
+                }
+                if(master_group >= UserInfo.MAX_CREATE_GROUP_COUNT) {
+                    AppConfig.PrintInfo(this , "已超出创建群组上限:" + UserInfo.MAX_CREATE_GROUP_COUNT);
+                    return;
+                }
+                Log.d("create_group" , "curr:" + master_group + " limit:" + UserInfo.MAX_CREATE_GROUP_COUNT);
                 intent = new Intent("CreateGroup");
                 startActivity(intent);
                 overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);

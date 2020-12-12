@@ -53,7 +53,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,16 +69,25 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 public class AppConfig {
     public static String ServerSpace = "schat";
-    public static String version = "0.0.1";
+    public static String version = "0.0.3";
     public static int CURRENT_SUPPORT_CHAT_TYPE = 2;
     public static int REQ_TIMEOUT = 7;
-    public static String Dir_QUERY_KEY = "??self_design";
+    public static String Dir_QUERY_KEY = "xxx";
     public static final String PGPREFS = "schat_share";	/*共享数据*/
     public static final int PGPREFS_MOD = Activity.MODE_PRIVATE;
+    public static boolean ServerSettingRecved = false;
 
-    private static String passwd_key_alias = "kavfkkxxc";
+
+    private static String passwd_key_alias = "xxxx";
     public static String user_local_des_key = "";
     private static KeyStoreUtil key_store_util = new KeyStoreUtil(); //key store
 
@@ -82,12 +96,12 @@ public class AppConfig {
     public static SimpleDateFormat min_format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     //IMAGE
-    public static final int UPLOAD_FILE_SIZE = (10 * 1024 * 1024);	/*上传图片最大尺寸*/
-    public static final int MAX_IMG_SIZE= (10 * 1024 * 1024); //最大10M
+    public static int UPLOAD_NORMAL_FILE_SIZE = (10 * 1024 * 1024);	/*上传文件最大尺寸*/
+    public static int MAX_IMG_SIZE= (10 * 1024 * 1024); //default 最大10M
     //public static final int HEAD_FILE_SIZE = (40 * 1024);
     public static void TryNotifyImgSize(Context context , int file_size) {
         if(file_size >= AppConfig.MAX_IMG_SIZE) {
-            AppConfig.PrintInfo(context , "图片大小超过10M , 上传时将进行压缩");
+            AppConfig.PrintInfo(context , "图片大小超过" + AppConfig.MAX_IMG_SIZE/1024/1024 + "M , 上传时将进行压缩");
         }
     }
     public static final int CHAT_IMG_STANDARD_SIZE = 150; //dp
@@ -96,7 +110,7 @@ public class AppConfig {
 
 
     //CHAT SERV
-    public static String ChatServHost = ""; //"119.29.135.45";
+    public static String ChatServHost = ""; //
     public static int    ChatServPort = 0; //17908;
     public static boolean ZlibOn = true; //zlib
 
@@ -110,6 +124,7 @@ public class AppConfig {
     public static final String KEY_CONN_SERV_IP = "conn_serv_ip"; //上一次登陆的conn_serv
     public static final String KEY_CONN_SERV_PORT = "conn_serv_port";
     public static final String KEY_LAST_EXIT = "last_logout"; //上一次退出时间
+    public static final String KEY_REQ_TIMEOUT = "req_timeout"; //请求超时时限
 
     //LOGIN
     public static String UserName;
@@ -127,7 +142,8 @@ public class AppConfig {
         return false;
     }
 
-    private static int MAX_DIS_RECONN_TIMES = 3;
+    public static int HEART_BEAT_FREQUENT =  10; //hearbeat second to server
+    public static int MAX_DIS_RECONN_TIMES = 3;
     private static int DisReConnTimes = 0;
     public static Activity main_act = null;
     //断线重连
@@ -352,6 +368,7 @@ public class AppConfig {
     public static final int FILE_SELECT_CODE=1;	//选择图片
     public static final int FILE_CROP_CODE = 2;	//裁剪图片
     public static final int USE_CAM_CODE = 3;	//使用相机
+    public static final int FILE_SELECT_VIDEO = 4; //选择视频文件
 
     //MiscInfo
     public static MiscInfo miscInfo = new MiscInfo();
@@ -439,6 +456,14 @@ public class AppConfig {
         }
         return sb.toString();
     }
+
+    public static byte[] getRandomBytes(int length){
+        Random random=new Random();
+        byte[] bts = new byte[length];
+        random.nextBytes(bts);
+        return bts;
+    }
+
 
     //check name
     public static int CheckName(Context context , String str , int length)
@@ -849,7 +874,7 @@ public class AppConfig {
             return null;
         }
 
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[1024*100];
         int len = 0;
 
         while((len=is.read(buffer)) > 0)
@@ -1097,6 +1122,105 @@ public class AppConfig {
         //file.delete();
     }
 
+    public static String VideoSnapName(String file_name) {
+        return file_name + "_snap";
+    }
+
+    public static String VideoTimeStr(long video_time_second) {
+        String result = "";
+        if(video_time_second >= 3600) {
+            result = String.format("%02d:%02d'" , video_time_second/3600 , video_time_second%3600);
+            return result;
+        }
+
+        if(video_time_second >= 60) {
+            result = String.format("%02d':%02d''" , video_time_second/60 , video_time_second%60);
+            return result;
+        }
+
+        result = String.format("%02d''" , video_time_second);
+        return result;
+    }
+
+
+    //get normal file path; or return ""
+    public static String getNormalChatFilePath(long grp_id , String file_name) {
+        String log_label = "existNormalChatFile";
+        String file_path = null;
+
+        //get dir
+        if(AppConfig.CHAT_MAIN_DIR_PATH == null) {
+            Log.e(log_label , "chat main dir path null!");
+            return "";
+        }
+        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+        //check
+        if(file_path==null || file_path.length()<=0) {
+            Log.e(log_label , "file path illegal! path:" + file_path);
+            return "";
+        }
+
+        //check
+        File local_file = new File(file_path);
+        if(local_file.exists()) {
+            //Log.d(log_label , "file exist! file_path:" + file_path);
+            return file_path;
+        }
+
+        Log.i(log_label , "file not exist! path:" + file_path);
+        return "";
+    }
+
+
+    //save normal chat file exclude image
+    public static boolean saveNormalChatFile(long grp_id , byte[] data , String file_name) {
+        String log_label = "saveNormalChatFile";
+        String file_path = null;
+
+        if(data == null) {
+            Log.e(log_label , "data null!");
+            return false;
+        }
+
+        //get dir
+        if(AppConfig.CHAT_MAIN_DIR_PATH == null) {
+            Log.e(log_label , "chat main dir path null!");
+            return false;
+        }
+        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+
+        //check
+        if(file_path==null || file_path.length()<=0) {
+            Log.e(log_label , "file path illegal!");
+            return false;
+        }
+
+        //save
+        //File head_file = new File(AppConfig.USER_HEAD_DIR_PATH + "/" + fileName + ".jpg");
+        File local_file = new File(file_path);
+        if(local_file.exists()) {
+            Log.d(log_label , "file exist! file_path:" + file_path);
+            return true;
+        }
+
+        //real save
+        try
+        {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(local_file));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+            Log.i(log_label, "save " + file_name + " success" + " path:" + file_path);
+        }
+        catch (Exception e)
+        {
+            Log.i(log_label, "save " + file_name + " failed");
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * 保存文件
@@ -1164,11 +1288,11 @@ public class AppConfig {
             bm.compress(Bitmap.CompressFormat.JPEG, 60, bos);
             bos.flush();
             bos.close();
-            Log.i(log_label, "save head " + file_name + " success");
+            Log.i(log_label, "save " + file_name + " success");
         }
         catch (Exception e)
         {
-            Log.i(log_label, "save head " + file_name + " failed");
+            Log.i(log_label, "save " + file_name + " failed");
             e.printStackTrace();
             return false;
         }
@@ -1276,7 +1400,7 @@ public class AppConfig {
         }
 
         //generate full query
-        String full_query = "http://" + file_info.Addr + "/" + query_path + "?token=" + file_info.Token +"&uid=" + AppConfig.UserUid;
+        String full_query = "https://" + file_info.Addr + "/" + query_path + "?token=" + file_info.Token +"&uid=" + AppConfig.UserUid;
         //Log.d(log_label , "full_query:" + full_query);
         return full_query;
     }
@@ -1358,7 +1482,7 @@ public class AppConfig {
 
 
     public static String FileAddr2UploadUrl(String addr) {
-        return "http://" + addr + "/upload/";
+        return "https://" + addr + "/upload/";
     }
 
     public static String ReadInputStream(InputStream input_stream)
@@ -1519,6 +1643,107 @@ public class AppConfig {
         } catch (IOException e)
         {
             e.printStackTrace();
+        }
+
+        return in;
+    }
+
+    private static class MyTrustManager implements X509TrustManager {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType)
+
+                throws CertificateException {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+    }
+    //private static MyTrustManager my_truster = new MyTrustManager();
+
+
+    private static class MyHostnameVerifier implements HostnameVerifier {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            // TODO Auto-generated method stub
+            return true;
+        }
+
+    }
+    //private static MyHostnameVerifier my_host_verifer = new MyHostnameVerifier();
+
+    public static boolean HttpsCertNoCheck() {
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, new TrustManager[]{new MyTrustManager()},
+                    new SecureRandom());
+            HttpsURLConnection
+                    .setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection
+                    .setDefaultHostnameVerifier(new MyHostnameVerifier());
+            return true;
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public static InputStream openHttpsConnGet(String https_url) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        InputStream in = null;
+        int response = -1;
+
+        //not need valid cert
+        /*
+        SSLContext sc = SSLContext.getInstance("TLS");
+        sc.init(null, new TrustManager[] { my_truster },
+                new SecureRandom());
+        HttpsURLConnection
+                .setDefaultSSLSocketFactory(sc.getSocketFactory());
+        HttpsURLConnection
+                .setDefaultHostnameVerifier(my_host_verifer);
+
+         */
+
+
+        URL url = new URL(https_url);
+        URLConnection conn = url.openConnection();
+
+        if(!(conn instanceof HttpURLConnection))
+        {
+            throw new IOException("Not a Http Connection");
+        }
+
+        try
+        {
+            HttpURLConnection http_conn = (HttpURLConnection)conn;
+            http_conn.setAllowUserInteraction(false);
+            http_conn.setInstanceFollowRedirects(true);
+            http_conn.setRequestMethod("GET");
+            http_conn.setRequestProperty("Charset", "UTF-8");
+            http_conn.connect();
+
+
+            response = http_conn.getResponseCode();
+            if(response == HttpURLConnection.HTTP_OK)
+            {
+                in = http_conn.getInputStream();
+            }
+
+        }
+        catch(Exception e)
+        {
+            throw new IOException("error connecting");
         }
 
         return in;

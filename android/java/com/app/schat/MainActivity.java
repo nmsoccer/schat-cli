@@ -215,11 +215,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void TickSendMsg() {
         new Thread(new Runnable() {
+            String log_label = "TickSendMsg";
             @Override
             public void run() {
                 try {
                     while (true) {
-                        Thread.sleep(10000); //sleep 10 sec per tick
+                        if(!main_act_runs) {
+                            Log.i(log_label , "main exit! out!");
+                            break;
+                        }
+                        Thread.sleep(AppConfig.HEART_BEAT_FREQUENT * 1000); //sleep  per tick
                         if(!AppConfig.IsLogin())
                             continue;
                         //send heart
@@ -289,9 +294,13 @@ public class MainActivity extends AppCompatActivity {
         /*移除用户及地址信息*/
         //editor.putString(AppConfig.KEY_USER_NAME , null);
 
-        //保存登出时间
+        //保存登出时间及其他
         editor.putLong(AppConfig.KEY_LAST_EXIT , exit_ts);
         Log.d(log_label , "last_exit:" + exit_ts);
+
+        editor.putInt(AppConfig.KEY_REQ_TIMEOUT , AppConfig.REQ_TIMEOUT);
+        Log.d(log_label , "req_timeout:" + AppConfig.REQ_TIMEOUT);
+
         editor.commit();
 
         //drop table

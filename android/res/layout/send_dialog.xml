@@ -95,11 +95,19 @@
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_pic"
-				android:layout_width="30dp"
+				android:layout_width="40dp"
 				android:layout_height="30dp"
 				android:layout_marginLeft="10dp"
 				android:layout_gravity="center_vertical"
 				android:background="@drawable/pic" />
+
+			<ImageView
+				android:id="@+id/iv_send_dialog_choose_video"
+				android:layout_width="40dp"
+				android:layout_height="30dp"
+				android:layout_marginLeft="10dp"
+				android:layout_gravity="center_vertical"
+				android:background="@drawable/video_choose" />
 
 		</LinearLayout>
 

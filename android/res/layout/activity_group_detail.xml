@@ -121,7 +121,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -149,7 +149,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -176,7 +176,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -217,7 +217,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -245,7 +245,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -288,7 +288,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
 
@@ -313,87 +313,107 @@
 
         </LinearLayout>
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp">
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:gravity="center"
-                android:textSize="12sp"
-                android:background="@color/transparent"
-                android:textColor="@color/bg_midnight_blue_lighter"
-                android:layout_centerInParent="true"
-                android:id="@+id/grp_detail_members_name"
-                android:text="成员"
-                />
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/grp_detail_members_name"
-                android:id="@+id/iv_grp_detail_add_member"
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:background="@color/transparent"
+                    android:textColor="@color/bg_midnight_blue_lighter"
+                    android:layout_centerInParent="true"
+                    android:id="@+id/grp_detail_members_name"
+                    android:text="成员"
+                    />
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/grp_detail_members_name"
+                    android:id="@+id/iv_grp_detail_add_member"
+                    android:visibility="gone"
+                    android:onClick="onClick"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/plus" />
+
+            </RelativeLayout>
+
+
+
+            <RelativeLayout
+                android:id="@+id/rl_group_detail_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
                 android:visibility="gone"
-                android:onClick="onClick"
-                android:layout_marginLeft="10dp"
-                android:background="@drawable/plus" />
+                android:orientation="horizontal">
 
-        </RelativeLayout>
+                <EditText
+                    android:id="@+id/et_group_detail_search"
+                    android:inputType="number"
+                    android:background="@color/bg_baobaocornerbody"
+                    android:hint="输入用户id"
+                    android:layout_width="250dp"
+                    android:layout_centerInParent="true"
+                    android:layout_height="30dp"
+                    android:textSize="12sp"
+                    android:textColorHint="@color/bg_main_head_font_body"
+                    android:textColor="@color/bg_black"
+                    android:singleLine="true"
+                    android:maxLength="12"/>
 
-        <RelativeLayout
-            android:id="@+id/rl_group_detail_search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:visibility="gone"
-            android:orientation="horizontal">
+                <Button
+                    android:id="@+id/btn_group_detail_do_search"
+                    android:onClick="onClick"
+                    android:layout_width="23dp"
+                    android:layout_height="23dp"
+                    android:background="@drawable/search"
+                    android:layout_marginLeft="5dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/bg_main_head_font_body"
+                    android:layout_toRightOf="@id/et_group_detail_search" />
 
-            <EditText
-                android:id="@+id/et_group_detail_search"
-                android:inputType="number"
-                android:background="@color/bg_baobaocornerbody"
-                android:hint="输入用户id"
-                android:layout_width="250dp"
-                android:layout_centerInParent="true"
-                android:layout_height="30dp"
-                android:textSize="12sp"
-                android:textColorHint="@color/bg_main_head_font_body"
-                android:textColor="@color/bg_black"
-                android:singleLine="true"
-                android:maxLength="12"/>
+            </RelativeLayout>
 
-            <Button
-                android:id="@+id/btn_group_detail_do_search"
-                android:onClick="onClick"
-                android:layout_width="23dp"
-                android:layout_height="23dp"
-                android:background="@drawable/search"
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
                 android:layout_marginLeft="5dp"
-                android:layout_centerVertical="true"
-                android:textColor="@color/bg_main_head_font_body"
-                android:layout_toRightOf="@id/et_group_detail_search" />
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="3dp" />
 
-        </RelativeLayout>
+                <GridView
+                    android:background="@color/bg_baobaobackgray"
+                    android:id="@+id/grp_detail_members"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:minHeight="50dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:scrollbars="vertical"
+                    android:scrollbarSize="2dp"
+                    android:horizontalSpacing="3dp"
+                    android:numColumns="6"
+                    android:verticalSpacing="5dp" />
 
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="3dp" />
-        <GridView
-            android:id="@+id/grp_detail_members"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:horizontalSpacing="3dp"
-            android:numColumns="7"
-            android:verticalSpacing="5dp" />
+            </LinearLayout>
+
+        </ScrollView>
+
 
     </LinearLayout>
 
@@ -403,7 +423,6 @@
         android:orientation="vertical"
         android:layout_alignParentBottom="true">
 
-
         <Button
             android:visibility="gone"
             android:id="@+id/grp_detail_exit"
@@ -411,11 +430,12 @@
             android:layout_gravity="center_horizontal"
             android:textSize="10sp"
             android:layout_width="fill_parent"
-            android:layout_height="40dp"
+            android:layout_height="30dp"
             android:textColor="@color/bg_white"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/select_orange_gray"
             android:onClick="onBtnClick" />
+
 
     </LinearLayout>
 </RelativeLayout>

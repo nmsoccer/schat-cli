@@ -293,6 +293,16 @@ public class GroupDetailActivity extends AppCompatActivity {
                 map.put("uid" , empty_uids.get(i));
                 list.add(map);
             }
+
+            //test
+            /*
+            for(int i=0; i<100; i++) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("name", "uid:" + i);
+                map.put("uid" , i+100);
+                list.add(map);
+            }*/
+
             adapter.notifyDataSetChanged();
 
         }
@@ -1084,10 +1094,6 @@ public class GroupDetailActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 break;
-            case AppConfig.FILE_CROP_CODE:
-                Bitmap bmp_tmp = intent.getParcelableExtra("data");
-                bmp_get = AppConfig.compressImage(bmp_tmp, AppConfig.UPLOAD_FILE_SIZE/1024);
-                break;
             default:
                 break;
         }
@@ -1173,7 +1179,7 @@ public class GroupDetailActivity extends AppCompatActivity {
                 AppConfig.PrintInfo(getBaseContext() , "系统错误 无法修改头像");
                 return null;
             }
-
+            Log.d(log_label , "upload_query:" + params[0]);
             try
             {
                 /*open connection*/

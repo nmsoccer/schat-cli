@@ -26,7 +26,7 @@ public class ChatClient {
 
     private static boolean sock_close = false;
     private static boolean validate = false;
-    private static int enc_type = 0;    //encrypt type 0:no 1:des-ecb 2:aes-cbc-128 3:rsa+des
+    private static int enc_type = 0;    //encrypt type 0:no 1:des-ecb 2:aes-cbc-128 3:rsa+xxx
     private static byte[] des_key;
     private static byte[] aes_key;
 
@@ -96,8 +96,8 @@ public class ChatClient {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private static boolean nego_des_key(Socket client , String des_key , String rsa_pub_key) {
-        String _func_ = "<nego_des_key>";
+    private static boolean nego_trans_key(Socket client , byte[] trans_key , String rsa_pub_key) {
+        String _func_ = "<nego_trans_key>";
         byte[] enc_data;
         byte[] pkg_buff;
         int pkg_len;
@@ -106,10 +106,10 @@ public class ChatClient {
         int i;
         int ret = 0;
 
-        pkg_buff = new byte[1024];
+        pkg_buff = new byte[1024*10];
         //encrypt des_key
         try {
-            enc_data = MyEncrypt.EncryptRsa(des_key, rsa_pub_key);
+            enc_data = MyEncrypt.EncryptRsa(trans_key, rsa_pub_key);
         }catch (Exception e) {
             Log.e(log_recv , _func_ + " encrypt failed!");
             e.printStackTrace();
@@ -132,7 +132,7 @@ public class ChatClient {
             OutputStream outToServer = client.getOutputStream();
             DataOutputStream out = new DataOutputStream(outToServer);
             out.write(pkg_buff, (int) 0, pkg_len);
-            System.out.printf(">>send des_key:%s pkg_len:%d success!\n", des_key, pkg_len);
+            System.out.printf(">>send trans_key:%s pkg_len:%d success!\n", new String(trans_key), pkg_len);
         }catch (IOException e) {
             Log.e(log_send , _func_ + " snd pkg failed!");
             e.printStackTrace();
@@ -268,11 +268,11 @@ public class ChatClient {
 
                     //nego des key
                     validate = false; //must confirm by server
-                    des_key = new byte[DES_KEY_LEN];
-                    String key = AppConfig.getRandomString(DES_KEY_LEN); //des key
-                    System.arraycopy(key.getBytes() , 0 , des_key , 0 , DES_KEY_LEN);
-                    if(! nego_des_key(sock , key , new String(rsa_pub_key))) {
-                        Log.e(log_recv , "nego_des_key failed! return false!");
+                    aes_key = new byte[AES_KEY_LEN];
+                    byte[] key = AppConfig.getRandomBytes(AES_KEY_LEN); //aes key
+                    System.arraycopy(key , 0 , aes_key , 0 , AES_KEY_LEN);
+                    if(! nego_trans_key(sock , key , new String(rsa_pub_key))) {
+                        Log.e(log_recv , "nego_aes_key failed! return false!");
                     }
                     break;
                 }
@@ -282,7 +282,7 @@ public class ChatClient {
             case NetPkg.PKG_OP_RSA_NEGO:
                 Log.i(log_recv , "spec_nego");
                 if(pkg_data[0]=='o' && pkg_data[1]=='k') {
-                    Log.i(log_recv , "nego des key success!");
+                    Log.i(log_recv , "nego trans key success!");
                     validate = true;
 
                     //断线重连
@@ -308,7 +308,7 @@ public class ChatClient {
                 enc_data = src_data;
                 break;
             case NetPkg.NET_ENCRYPT_DES_ECB:
-            case NetPkg.NET_ENCRYPT_RSA:
+            //case NetPkg.NET_ENCRYPT_RSA:
                 if(des_key == null){
                     Log.i(log_send, "enc_type:des but key not set!");
                     break;
@@ -323,6 +323,7 @@ public class ChatClient {
                 }
                 break;
             case NetPkg.NET_ENCRYPT_AES_CBC_128:
+            case NetPkg.NET_ENCRYPT_RSA:
                 if(aes_key == null){
                     Log.i(log_send, "enc_type:aes but key not set!");
                     break;
@@ -349,7 +350,7 @@ public class ChatClient {
             case NetPkg.NET_ENCRYPT_NONE:
                 return msg;
             case NetPkg.NET_ENCRYPT_DES_ECB:
-            case NetPkg.NET_ENCRYPT_RSA:
+            //case NetPkg.NET_ENCRYPT_RSA:
                 if(!validate || des_key==null || des_key.length <=0) {
                     Log.e(log_recv , "des_key not set!");
                     return null;
@@ -362,6 +363,7 @@ public class ChatClient {
                     return null;
                 }
             case NetPkg.NET_ENCRYPT_AES_CBC_128:
+            case NetPkg.NET_ENCRYPT_RSA:
                 if(!validate || aes_key==null || aes_key.length <=0) {
                     Log.e(log_recv , "aes_key not set!");
                     return null;
