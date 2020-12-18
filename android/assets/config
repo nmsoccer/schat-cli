@@ -6,6 +6,6 @@ validate_digest = 0
 #pub_sha2_0 = aaaaa
 #pub_sha2_1 = bbbbb
 #https server self-signed cert
-self_signed_cert_open = 1
+self_signed_cert_open = 0
 #bks_file = key.bks
 #bks_pass = xxxx
