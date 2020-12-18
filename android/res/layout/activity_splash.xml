@@ -59,17 +59,42 @@
 
         </LinearLayout>
 
-        <Button
-            android:layout_alignParentBottom="true"
-            android:id="@+id/bt_splash_enter"
-            android:gravity="center"
-            android:textColor="@color/bg_white"
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:onClick="onClick"
-            android:background="@drawable/select_blue_gray"
-            android:textSize="10sp"
-            android:text="完成" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+            <Button
+                android:id="@+id/bt_splash_enter"
+                android:gravity="center"
+                android:textColor="@color/bg_white"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:onClick="onClick"
+                android:layout_gravity="center"
+                android:background="@drawable/select_blue_gray"
+                android:textSize="10sp"
+                android:text="完成" />
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fl_splash_progress"
+                android:visibility="gone"
+                android:layout_gravity="center">
+                <ProgressBar
+                    android:id="@+id/pb_splash_progress"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="10sp"
+                    android:textColor="@color/bg_white"
+                    android:id="@+id/tv_splash_progress"/>
+            </FrameLayout>
+        </FrameLayout>
 
     </RelativeLayout>
 

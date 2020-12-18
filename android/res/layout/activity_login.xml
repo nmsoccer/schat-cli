@@ -93,11 +93,9 @@
 
     </LinearLayout>
     
-    <LinearLayout 
+    <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
         android:layout_alignParentBottom="true">
 
 
@@ -108,28 +106,32 @@
 	        android:layout_width="fill_parent"
 	        android:layout_height="40dp"
 	        android:onClick="onClick"
+			android:visibility="gone"
 	        android:background="@drawable/select_blue_gray"
 	        android:textSize="10sp"
 	        android:text="登陆" />
-	    
-	     <ImageView
-			android:visibility="gone"
-	        android:layout_width="fill_parent"
-	        android:layout_height="1dp"
-	        android:background="@drawable/line" 
-	        />
-	    
-	    <Button
-			android:visibility="gone"
-	        android:gravity="center"	        
-	        android:textColor="@color/bg_white"
-	        android:layout_width="fill_parent"
-			android:layout_marginTop="5dp"
-	        android:layout_height="40dp"
-	        android:background="@drawable/select_orange_gray"
-			android:textSize="10sp"
-	        android:text="注册" />
-    </LinearLayout>
+
+		<FrameLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/fl_login_progress"
+			android:layout_gravity="center">
+			<ProgressBar
+				android:id="@+id/login_progress"
+				style="@android:style/Widget.ProgressBar.Horizontal"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"/>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:text="checking"
+				android:textColor="@color/bg_white"
+				android:id="@+id/tv_login_progress"/>
+		</FrameLayout>
+
+    </FrameLayout>
     
 
 </RelativeLayout>

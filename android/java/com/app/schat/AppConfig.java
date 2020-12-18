@@ -49,12 +49,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -64,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -74,27 +80,28 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 public class AppConfig {
     public static String ServerSpace = "schat";
-    public static String version = "0.0.3";
-    public static int CURRENT_SUPPORT_CHAT_TYPE = 2;
+    public static String version = "";
+    public static int CURRENT_SUPPORT_CHAT_TYPE = CSProto.CHAT_MSG_TYPE_VOICE;
     public static int REQ_TIMEOUT = 7;
-    public static String Dir_QUERY_KEY = "xxx";
+    
     public static final String PGPREFS = "schat_share";	/*共享数据*/
     public static final int PGPREFS_MOD = Activity.MODE_PRIVATE;
     public static boolean ServerSettingRecved = false;
+    public static Properties prop = null;
 
-
-    private static String passwd_key_alias = "xxxx";
+    private static String passwd_key_alias = "ssccaatt_ppaass";
     public static String user_local_des_key = "";
     private static KeyStoreUtil key_store_util = new KeyStoreUtil(); //key store
 
     public static int LOGIN_SERVER_STICKY = 600; //within period login last logout server.
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static SimpleDateFormat min_format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
+    public static int MAX_AUDIO_SECONDS = 30;
     //IMAGE
     public static int UPLOAD_NORMAL_FILE_SIZE = (10 * 1024 * 1024);	/*上传文件最大尺寸*/
     public static int MAX_IMG_SIZE= (10 * 1024 * 1024); //default 最大10M
@@ -125,6 +132,67 @@ public class AppConfig {
     public static final String KEY_CONN_SERV_PORT = "conn_serv_port";
     public static final String KEY_LAST_EXIT = "last_logout"; //上一次退出时间
     public static final String KEY_REQ_TIMEOUT = "req_timeout"; //请求超时时限
+
+    //摘要
+    public static String pub_key_sha2 = ""; //public key sha256 hash code
+    //---------
+    /**
+     * SHA256hash
+     * @param str
+     * @return
+     */
+    public static String String2SHA256StrJava(String str){
+        MessageDigest messageDigest;
+        String encodeStr = "";
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(str.getBytes("UTF-8"));
+            encodeStr = byte2Hex(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return encodeStr;
+    }
+
+    /**
+     * SHA256hash
+     * @param content
+     * @return
+     */
+    public static String Bytes2SHA256StrJava(byte[] content){
+        MessageDigest messageDigest;
+        String encodeStr = "";
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(content);
+            encodeStr = byte2Hex(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return encodeStr;
+    }
+
+
+    /**
+     * 将byte转为16进制
+     * @param bytes
+     * @return
+     */
+    private static String byte2Hex(byte[] bytes){
+        StringBuffer stringBuffer = new StringBuffer();
+        String temp = null;
+        for (int i=0;i<bytes.length;i++){
+            temp = Integer.toHexString(bytes[i] & 0xFF);
+            if (temp.length()==1){
+                //1得到一位的进行补0操作
+                stringBuffer.append("0");
+            }
+            stringBuffer.append(temp);
+        }
+        return stringBuffer.toString();
+    }
 
     //LOGIN
     public static String UserName;
@@ -382,6 +450,7 @@ public class AppConfig {
     public static String USER_HEAD_DIR_PATH = null;	//用户头像目录
     public static String CHAT_MAIN_DIR_PATH = null; //聊天主目录
     public static String GROUP_HEAD_DIR_PATH = null; //群组头像主目录
+    public static String TEMP_MISC_DIR_PATH = null;  //临时文件目录
     public static int GROUP_FILE_DIR_MAX = 23;
 
     public static String GrpId2FileDir(long grp_id) {
@@ -400,6 +469,102 @@ public class AppConfig {
             Log.i(log_label , "create group dir:" + dir_path);
         }
         Log.d(log_label , "grp_id:" + grp_id + " group dir:" + dir_path);
+    }
+
+
+    public static void DelTempMiscFile(String file_name) {
+        String log_label = "DelTempMiscFile";
+        //check
+        if(TextUtils.isEmpty(file_name)) {
+            Log.e(log_label , "file name empty!");
+            return;
+        }
+
+        String file_path = AppConfig.TEMP_MISC_DIR_PATH + "/" + file_name;
+        File local_file = new File(file_path);
+        if(local_file.exists() == false) {
+            Log.d(log_label , "file not exist! file_path:" + file_path);
+            return;
+        }
+
+        //del
+        Log.d(log_label , "del finish! file:" + file_path);
+        local_file.delete();
+    }
+
+    public static byte[] ReadTempMiscFile(String file_name) {
+        String log_label = "ReadTempMiscFile";
+
+        //check
+        if(TextUtils.isEmpty(file_name)) {
+            Log.e(log_label , "file name empty!");
+            return null;
+        }
+
+        String file_path = AppConfig.TEMP_MISC_DIR_PATH + "/" + file_name;
+        //exist?
+        File local_file = new File(file_path);
+        if(local_file.exists() == false) {
+            Log.d(log_label , "file not exist! file_path:" + file_path);
+            return null;
+        }
+
+        //load
+        try
+        {
+            InputStream fips = new FileInputStream(file_path);
+            byte[] data = ReadInput2Bytes(fips);
+
+            if(data == null)
+                return null;
+            return  data;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    public static String RecordAudioFile = "";
+    public static String GetTempMiscFilePath(String file_name) {
+        if(TextUtils.isEmpty(file_name))
+            return null;
+        return AppConfig.TEMP_MISC_DIR_PATH + "/" + file_name;
+    }
+
+    public static boolean SaveTempMiscFile(String file_name , byte[] data) {
+        String log_label = "SaveTempMiscFile";
+        if(TextUtils.isEmpty(file_name)) {
+            Log.e(log_label , "file name empty!");
+            return false;
+        }
+
+        //path
+        String file_path = AppConfig.TEMP_MISC_DIR_PATH + "/" + file_name;
+        File local_file = new File(file_path);
+        if(local_file.exists()) {
+            Log.d(log_label , "file exist! file_path:" + file_path);
+            return true;
+        }
+
+        //real save
+        try
+        {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(local_file));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+            Log.i(log_label, "save " + file_name + " success");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.i(log_label, "save " + file_name + " failed");
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
@@ -445,6 +610,7 @@ public class AppConfig {
     public static void PrintInfo(Context context , String str) {
         Toast.makeText(context , str , Toast.LENGTH_SHORT).show();
     }
+
 
     public static String getRandomString(int length){
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -549,6 +715,10 @@ public class AppConfig {
     //time
     public static long CurrentUnixTime() {
         long timeStamp = System.currentTimeMillis() / 1000;
+        return timeStamp;
+    }
+    public static long CurrentUnixTimeMilli() {
+        long timeStamp = System.currentTimeMillis();
         return timeStamp;
     }
     public static String ConverUnixTime2Str(long UnixTime)
@@ -1105,7 +1275,7 @@ public class AppConfig {
     }
 
 
-    private static void DeleteFile(File file){
+    public static void DeleteFile(File file){
         String log_label = "DeleteFile";
         if(file.isFile()){//判断是否为文件，是，则删除
             Log.i(log_label , "del_file:" + file.getAbsoluteFile().toString());//打印路径
@@ -1126,7 +1296,7 @@ public class AppConfig {
         return file_name + "_snap";
     }
 
-    public static String VideoTimeStr(long video_time_second) {
+    public static String FormatTimeStr(long video_time_second) {
         String result = "";
         if(video_time_second >= 3600) {
             result = String.format("%02d:%02d'" , video_time_second/3600 , video_time_second%3600);
@@ -1142,6 +1312,52 @@ public class AppConfig {
         return result;
     }
 
+
+    /**
+     * 得到amr的时长
+     *
+     * @param file_path
+     * @return amr文件时间长度
+     * @throws IOException
+     */
+    public static int getAmrDuration(String file_path) throws IOException {
+        if(TextUtils.isEmpty(file_path))
+            return -1;
+        long duration = -1;
+        int[] packedSize = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 0, 0, 0, 0, 0,
+                0, 0 };
+        File file = new File(file_path);
+        RandomAccessFile randomAccessFile = null;
+        try {
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            // 文件的长度
+            long length = file.length();
+            // 设置初始位置
+            int pos = 6;
+            // 初始帧数
+            int frameCount = 0;
+            int packedPos = -1;
+            // 初始数据值
+            byte[] datas = new byte[1];
+            while (pos <= length) {
+                randomAccessFile.seek(pos);
+                if (randomAccessFile.read(datas, 0, 1) != 1) {
+                    duration = length > 0 ? ((length - 6) / 650) : 0;
+                    break;
+                }
+                packedPos = (datas[0] >> 3) & 0x0F;
+                pos += packedSize[packedPos] + 1;
+                frameCount++;
+            }
+            // 帧数*20
+            duration += frameCount * 20;
+        } finally {
+            if (randomAccessFile != null) {
+                randomAccessFile.close();
+            }
+        }
+        return (int)((duration/1000)+1);
+    }
 
     //get normal file path; or return ""
     public static String getNormalChatFilePath(long grp_id , String file_name) {
@@ -1699,6 +1915,56 @@ public class AppConfig {
 
     }
 
+    //Self Cert
+
+    public static boolean HttpCertSelf(Context context , String bks_file , String bks_pass) {
+        if(TextUtils.isEmpty(bks_file) || TextUtils.isEmpty(bks_pass))
+            return false;
+
+        try {
+            TrustManagerFactory trustManagerFactory = null;
+            // Get an instance of the Bouncy Castle KeyStore format
+            KeyStore trusted = KeyStore.getInstance("BKS");
+            // 从资源文件中读取你自己创建的那个包含证书的 keystore 文件
+
+            //InputStream in = context.getResources().openRawResource(R.raw.key); //这个参数改成你的 keystore 文件名
+            InputStream in = context.getAssets().open(bks_file);
+            // 用 keystore 的密码跟证书初始化 trusted
+            trusted.load(in, bks_pass.toCharArray());
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
+            trustManagerFactory.init(trusted);
+
+            //set SSLContext
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+            HttpsURLConnection
+                    .setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection
+                    .setDefaultHostnameVerifier(new MyHostnameVerifier());
+
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (CertificateException e) {
+            e.printStackTrace();
+            return false;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return  false;
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+            return  false;
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+            return  false;
+        }
+        return true;
+    }
+
+
+
     public static InputStream openHttpsConnGet(String https_url) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         InputStream in = null;
         int response = -1;
@@ -1730,6 +1996,8 @@ public class AppConfig {
             http_conn.setAllowUserInteraction(false);
             http_conn.setInstanceFollowRedirects(true);
             http_conn.setRequestMethod("GET");
+            http_conn.setConnectTimeout(5000);
+            http_conn.setReadTimeout(10000);
             http_conn.setRequestProperty("Charset", "UTF-8");
             http_conn.connect();
 

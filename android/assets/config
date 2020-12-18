@@ -1,0 +1,11 @@
+app_name = schat
+version = 0.0.4
+dir_query_key = ccddsfff
+#validate conn_server pub-key digest count if 0 no check
+validate_digest = 0
+#pub_sha2_0 = aaaaa
+#pub_sha2_1 = bbbbb
+#https server self-signed cert
+self_signed_cert_open = 1
+#bks_file = key.bks
+#bks_pass = xxxx

@@ -15,13 +15,15 @@ public class ChatEntity
     public String file_name;
     public Bitmap bmp_content;
     public long chat_flag;
-    public long video_time;
+    public long last_time;
     public boolean isComeMsg() {
         return isComeMsg;
     }
     public void setComeMsg(boolean isComeMsg) {
         this.isComeMsg = isComeMsg;
     }
+    public boolean in_read; //only for image
+    public long tmp_id; //for sending msg
 
     /*
     public int getUserImage() {  

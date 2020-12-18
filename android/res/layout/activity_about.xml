@@ -41,6 +41,7 @@
             android:background="@drawable/ic_launcher_round" />
 
         <TextView
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -53,16 +54,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:text="a simple chat app"
+            android:text="Simple Chat"
             android:textColor="@color/bg_main_head_font_body"
             android:textSize="12sp" />
 
         <TextView
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:text="source code:\nserver https://github.com/nmsoccer/schat\nclient  https://github.com/nmsoccer/schat-cli/android"
+            android:text="\nhttps://github.com/nmsoccer/schat\nhttps://github.com/nmsoccer/schat-cli/android"
             android:textColor="@color/bg_main_head_font_body"
             android:textSize="12sp" />
 

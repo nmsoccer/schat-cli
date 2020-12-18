@@ -1,6 +1,7 @@
 package com.app.schat;
 
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -188,6 +189,13 @@ public class ChatClient {
 
     }
 
+    public static boolean Connected() {
+        if(sock_stat==STAT_DONE && sock!=null && validate && !sock_close) {
+            return  true;
+        }
+        return false;
+    }
+
     /*
     Send Msg
      */
@@ -264,14 +272,19 @@ public class ChatClient {
                 if(enc_type == NetPkg.NET_ENCRYPT_RSA) {
                     byte[] rsa_pub_key = new byte[pkg_data.length - 1];
                     System.arraycopy(pkg_data , 1 , rsa_pub_key , 0 , pkg_data.length-1);
-                    Log.i(log_recv , "enc_type use rsa! key:" + (new String(rsa_pub_key)));
+                    String pub_key = new String(rsa_pub_key);
+                    Log.d(log_recv , "enc_type use rsa! key:" + pub_key);
+                    //generate sha256
+                    String pub_sha256 = AppConfig.String2SHA256StrJava(pub_key);
+                    Log.d(log_recv , "pub_sha256:" + pub_sha256);
+                    AppConfig.pub_key_sha2 = pub_sha256;
 
                     //nego des key
                     validate = false; //must confirm by server
                     aes_key = new byte[AES_KEY_LEN];
                     byte[] key = AppConfig.getRandomBytes(AES_KEY_LEN); //aes key
                     System.arraycopy(key , 0 , aes_key , 0 , AES_KEY_LEN);
-                    if(! nego_trans_key(sock , key , new String(rsa_pub_key))) {
+                    if(! nego_trans_key(sock , key , pub_key)) {
                         Log.e(log_recv , "nego_aes_key failed! return false!");
                     }
                     break;
@@ -282,9 +295,28 @@ public class ChatClient {
             case NetPkg.PKG_OP_RSA_NEGO:
                 Log.i(log_recv , "spec_nego");
                 if(pkg_data[0]=='o' && pkg_data[1]=='k') {
-                    Log.i(log_recv , "nego trans key success!");
+                    //validate sha2
+                    int hash_key_len = pkg_data[8];
+                    if(pkg_data.length < 128 || hash_key_len>=1024) {
+                        Log.e(log_recv , "length illegal! data_len:" + pkg_data.length + " key_len:" + hash_key_len);
+                        des_key = null;
+                        validate = false;
+                        break;
+                    }
+                    byte[] server_hash = new byte[hash_key_len];
+                    System.arraycopy(pkg_data , 9 , server_hash , 0 , hash_key_len);
+                    String server_hash_key = new String(server_hash);
+                    Log.i(log_recv , "nego trans key returns ok! hash_len:" + hash_key_len + " key:" + server_hash_key);
+                    //match
+                    String local_hash_key = AppConfig.Bytes2SHA256StrJava(aes_key);
+                    if(!TextUtils.equals(server_hash_key , local_hash_key)) {
+                        Log.e(log_recv , "server_hash_key:" + server_hash_key + " not match local:" + local_hash_key);
+                        des_key = null;
+                        validate = false;
+                        break;
+                    }
+                    Log.d(log_recv , "server_hash_key:" + server_hash_key + " matched local:" + local_hash_key);
                     validate = true;
-
                     //断线重连
                     AppConfig.DisConnReConn();
                 } else {

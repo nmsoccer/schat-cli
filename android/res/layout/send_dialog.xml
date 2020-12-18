@@ -71,7 +71,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
-		android:visibility="gone"
+
 		android:id="@+id/ll_send_dialog_more">
 
 		<ImageView
@@ -83,7 +83,7 @@
 
 		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
+			android:layout_height="30dp"
 			android:layout_marginTop="5dp"
 			android:orientation="horizontal">
 
@@ -91,23 +91,56 @@
 				android:layout_width="30dp"
 				android:layout_height="30dp"
 				android:id="@+id/iv_send_dialog_default_emoji"
-				android:background="@drawable/emoji"/>
+				android:background="@drawable/select_send_chat_emoji"/>
+
+			<TextView
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="5dp"
+				android:layout_marginRight="5dp"
+				android:background="@color/bg_silver"/>
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_pic"
 				android:layout_width="40dp"
 				android:layout_height="30dp"
-				android:layout_marginLeft="10dp"
 				android:layout_gravity="center_vertical"
-				android:background="@drawable/pic" />
+				android:background="@drawable/select_send_chat_image" />
+
+			<TextView
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="5dp"
+				android:layout_marginRight="5dp"
+				android:background="@color/bg_silver"/>
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_video"
 				android:layout_width="40dp"
 				android:layout_height="30dp"
-				android:layout_marginLeft="10dp"
 				android:layout_gravity="center_vertical"
-				android:background="@drawable/video_choose" />
+				android:background="@drawable/select_send_chat_video" />
+
+			<TextView
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="5dp"
+				android:layout_marginRight="5dp"
+				android:background="@color/bg_silver"/>
+
+			<ImageView
+				android:id="@+id/iv_send_dialog_choose_voice"
+				android:layout_width="40dp"
+				android:layout_height="30dp"
+				android:layout_gravity="center_vertical"
+				android:background="@drawable/select_send_chat_voice" />
+
+			<TextView
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="5dp"
+				android:layout_marginRight="5dp"
+				android:background="@color/bg_silver"/>
 
 		</LinearLayout>
 

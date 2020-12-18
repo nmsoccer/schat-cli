@@ -31,7 +31,7 @@ public class CSProto {
     public static final int CS_PROTO_APPLY_GRP_NOTIFY = 13;
     public static int CS_PROTO_APPLY_GRP_AUDIT  = 14;
     public static int CS_PROTO_SEND_CHAT_REQ = 15;
-    public static int CS_PROTO_SEND_CHAT_RSP = 16;
+    public static final int CS_PROTO_SEND_CHAT_RSP = 16;
     public static final int CS_PROTO_SYNC_CHAT_LIST = 17;
     public static int CS_PROTO_EXIT_GROUP_REQ = 18;
     public static final int CS_PROTO_EXIT_GROUP_RSP = 19;
@@ -112,6 +112,7 @@ public class CSProto {
     public static final int CHAT_MSG_TYPE_TEXT = 0;
     public static final int CHAT_MSG_TYPE_IMG = 1;
     public static final int CHAT_MSG_TYPE_MP4 = 2;
+    public static final int CHAT_MSG_TYPE_VOICE = 3;
 
     //SYNC CHAT TYPE
     public static final int SYNC_CHAT_TYPE_NORMAL = 0;
@@ -146,6 +147,9 @@ public class CSProto {
                     break;
                 case CS_PROTO_GROUP_GROUND_RSP:
                     CSGroupGroundRsp(sub);
+                    break;
+                case CS_PROTO_SEND_CHAT_RSP:
+                    CSSendChatRsp(sub);
                     break;
                 case CS_PROTO_SYNC_CHAT_LIST:
                     CSSyncChatList(sub);
@@ -241,7 +245,7 @@ public class CSProto {
 
 
     //generate send chat req
-    public static String CSSendChatReq(int chat_type , long grp_id , String content) {
+    public static String CSSendChatReq(int chat_type , long grp_id , String content , long tmp_id) {
         try {
             //root
             JSONObject obj = new JSONObject();
@@ -249,7 +253,7 @@ public class CSProto {
 
             //sub
             JSONObject sub = new JSONObject();
-            sub.put("temp_id" , 111);
+            sub.put("temp_id" , tmp_id);
             sub.put("chat_type" , chat_type);
             sub.put("grp_id" , grp_id);
             sub.put("content" , content);
@@ -1065,6 +1069,34 @@ public class CSProto {
         if(count>0 || item_list.size()>0) {
             ChatInfo.AddGroupSnap(item_list);
         }
+    }
+
+    //chat rsp
+    private static void CSSendChatRsp(JSONObject sub) throws JSONException {
+        String log_label = "CsSendChatRsp";
+        long temp_id = sub.getLong("temp_id");
+        int result = sub.getInt("result");
+        if(result != CSProto.COMMON_RESULT_SUCCESS) {
+            Log.e(log_label , "send failed! temp_id:" + temp_id);
+            return;
+        }
+
+        //get group
+        JSONObject o_msg = sub.getJSONObject("chat_msg");
+        if(o_msg == null) {
+            Log.e(log_label , "chat msg nil! temp_id:" + temp_id);
+            return;
+        }
+
+        long grp_id = o_msg.getLong("grp_id");
+        UserChatGroup u_grp = UserInfo.getChatGrp(grp_id);
+        if(u_grp == null) {
+            Log.e(log_label , "group info null! grp_id:" + grp_id + " temp_id:" + temp_id);
+            return;
+        }
+
+        u_grp.recved_tmp_list.add(temp_id);
+        Log.d(log_label , "finish! grp_id:" + grp_id + " temp_id:" + temp_id);
     }
 
     //cs sync chat list

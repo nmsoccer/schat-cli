@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -50,6 +51,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,8 +70,13 @@ public class ChatDetailActivity extends Activity {
     private final int LOAD_FLAG_NEW = 2;
     private final int LOAD_FLAG_CRAETE_NEW = 3; //create with new msg
 
+    private final int JUMP_TO_DEFAULT = 0;
+    private final int JUMP_TO_AUDIO = 1;
+
     private TextView tv_chat_name = null;
     private ImageView iv_chat_grp;
+    private Button btn_send_chat;
+    private ProgressBar pb_progress;
     private ListView chatListView = null;
     private List<ChatEntity> chatList = null;
     private ChatAdapter chatAdapter = null;
@@ -99,15 +106,20 @@ public class ChatDetailActivity extends Activity {
     View content_view;
     ZoomableImageView iv_large;
     Bitmap chat_img_origion;
-
+    private MediaPlayer mPlayer;
+    int jump_to = 0; //
+    private String playing_file_name = "";
+    private boolean playing_voice = false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.chat_detail);
-        tv_chat_name = (TextView)this.findViewById(R.id.chat_detail_tv_chat_name);
-        chatListView = (ListView) this.findViewById(R.id.chat_detail_listview);
-        iv_chat_grp = (ImageView)this.findViewById(R.id.chat_detail_iv_grp);
+        tv_chat_name = this.findViewById(R.id.chat_detail_tv_chat_name);
+        chatListView = this.findViewById(R.id.chat_detail_listview);
+        iv_chat_grp = this.findViewById(R.id.chat_detail_iv_grp);
+        btn_send_chat = this.findViewById(R.id.chat_detail_btn_send);
+        pb_progress = this.findViewById(R.id.chat_detail_pb_progress);
 
         /***RECVER*/
         Intent intent = this.getIntent();
@@ -220,6 +232,30 @@ public class ChatDetailActivity extends Activity {
         check_chat = true;
         CheckChatMsg();
     }
+
+
+    @Override
+    public void onResume()
+    {
+        String log_label = "chat_detail.on_resume";
+        super.onResume();
+        Log.d(log_label , "start");
+        CheckJumpBack();
+    }
+
+    private void CheckJumpBack() {
+        switch (jump_to) {
+            case JUMP_TO_AUDIO:
+                DialogDisplayVoice();
+                break;
+            default:
+                break;
+        }
+
+        //reset
+        jump_to = JUMP_TO_DEFAULT;
+    }
+
 
     @Override
     protected void onDestroy()
@@ -364,6 +400,7 @@ public class ChatDetailActivity extends Activity {
                 chatHolder.userTextView = (TextView) convertView.findViewById(R.id.chat_item_tv_name);
                 chatHolder.contentImageView = (ImageView)convertView.findViewById(R.id.chat_item_iv_content);
                 chatHolder.durationTextView = (TextView)convertView.findViewById(R.id.chat_item_tv_duration);
+                chatHolder.readingTextView = (TextView)convertView.findViewById(R.id.chat_item_tv_read);
                 convertView.setTag(chatHolder);
             }
             else
@@ -386,16 +423,28 @@ public class ChatDetailActivity extends Activity {
                             //((TextView)view).setTextIsSelectable(true);
                             break;
                         case R.id.chat_item_iv_content:
-                            if(entity.file_name==null || entity.file_name.length()<=0)
-                                return;
-                            if(entity.chat_type == CSProto.CHAT_MSG_TYPE_IMG)
+                        case R.id.chat_item_tv_duration:
+                            if(TextUtils.isEmpty(entity.file_name))
+                                break;
+                            if(entity.chat_type == CSProto.CHAT_MSG_TYPE_IMG) {
                                 showFullImg(entity.file_name);
+                                if(!entity.in_read) {
+                                    entity.in_read = true;
+                                    chatAdapter.notifyDataSetChanged();
+                                }
+                            }
                             else if(entity.chat_type == CSProto.CHAT_MSG_TYPE_MP4)
                                 showVideo(entity.file_name);
-                            else {
-                                //nothing
+                            else if(entity.chat_type == CSProto.CHAT_MSG_TYPE_VOICE){
+                                playRecord(entity.file_name , (int) entity.last_time);
+                                if(!entity.in_read) {
+                                    entity.in_read = true;
+                                    chatAdapter.notifyDataSetChanged();
+                                }
                             }
+                            break;
                         default:
+                            Log.d("view.onclick" , "nothing click");
                             break;
                     }
                 }
@@ -421,7 +470,12 @@ public class ChatDetailActivity extends Activity {
             //chatHolder.userImageView.setImageDrawable(null);
             chatHolder.userTextView.setText(entity.userName);
             chatHolder.contentImageView.setImageDrawable(null); //clear bitmap to transparent
+            chatHolder.contentImageView.setVisibility(View.GONE);
             chatHolder.durationTextView.setVisibility(View.GONE);
+            if(!entity.in_read)
+                chatHolder.readingTextView.setVisibility(View.GONE);
+            else
+                chatHolder.readingTextView.setVisibility(View.VISIBLE);
             //Image
             if(entity.chat_type == CSProto.CHAT_MSG_TYPE_IMG) {
                 chatHolder.contentTextView.setVisibility(View.GONE);
@@ -442,16 +496,30 @@ public class ChatDetailActivity extends Activity {
                 if(!TextUtils.isEmpty(entity.file_name)) {
                     if(entity.bmp_content != null) { //load snap short
                         chatHolder.contentImageView.setImageDrawable(null);
-                        Log.d(log_label , "mp4 snap ready! file:" + entity.file_name + " duration:" + entity.video_time);
+                        Log.d(log_label , "mp4 snap ready! file:" + entity.file_name + " duration:" + entity.last_time);
                         chatHolder.contentImageView.setImageBitmap(entity.bmp_content);
-                        chatHolder.durationTextView.setText(AppConfig.VideoTimeStr(entity.video_time));
+                        chatHolder.durationTextView.setText(AppConfig.FormatTimeStr(entity.last_time));
                     } else {
                         TryLoadVideoFile(entity.msg_id, entity.content, entity.file_name);
                     }
 
                 } else
                     chatHolder.contentImageView.setImageDrawable(getResources().getDrawable(R.drawable.video_bak));
-            } else { //TEXT
+            } else if(entity.chat_type==CSProto.CHAT_MSG_TYPE_VOICE) { //VOICE
+                chatHolder.contentTextView.setText("-------语音-------");
+                chatHolder.durationTextView.setVisibility(View.VISIBLE);
+                if(!TextUtils.isEmpty(entity.file_name)) {
+                    if(entity.last_time == 0) {
+                        //TryLoad
+                        TryLoadVoiceFile(entity.msg_id, entity.content, entity.file_name);
+                    } else if(entity.last_time < 0){
+                        //illegal file
+                    } else {
+                        chatHolder.durationTextView.setText(AppConfig.FormatTimeStr(entity.last_time));
+                    }
+                }
+
+            }else { //TEXT
                 chatHolder.contentTextView.setVisibility(View.VISIBLE);
                 chatHolder.contentImageView.setVisibility(View.GONE);
                 entity.bmp_content = null; //set nil
@@ -468,6 +536,7 @@ public class ChatDetailActivity extends Activity {
             }
             chatHolder.contentImageView.setOnClickListener(listener);
             chatHolder.contentImageView.setOnLongClickListener(long_listener);
+            chatHolder.durationTextView.setOnClickListener(listener);
             if(entity.uid == UserInfo.SYS_UID) {
                 chatHolder.contentTextView.setTextColor(getResources().getColor(R.color.bg_main_head_font_body));
                 chatHolder.userTextView.setText("系统");
@@ -495,6 +564,7 @@ public class ChatDetailActivity extends Activity {
             private TextView contentTextView;
             private ImageView contentImageView;
             private TextView durationTextView;
+            private TextView readingTextView;
         }
 
     }
@@ -538,6 +608,99 @@ public class ChatDetailActivity extends Activity {
         intent.putExtra("file" , file_path);
         startActivity(intent);
         overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+    }
+
+    private void stopRecord() {
+        String log_label = "stopRecord";
+        Log.d(log_label , "done");
+        playing_voice = false;
+        btn_send_chat.setVisibility(View.VISIBLE);
+        pb_progress.setVisibility(View.GONE);
+        pb_progress.setProgress(0);
+        if(mPlayer == null)
+            return;
+
+        mPlayer.stop();
+        mPlayer.release();
+        mPlayer = null;
+    }
+
+    private void playRecord(String audio_file_name , int last_time) {
+        final String log_label = "playRecord";
+        if(mPlayer != null && mPlayer.isPlaying()) {
+            if(TextUtils.equals(audio_file_name , playing_file_name)) {
+                Log.d(log_label , "in playing file:" + playing_file_name);
+                stopRecord();
+                return;
+            } else {
+                Log.d(log_label , "will play new file:" + audio_file_name + " old:" + playing_file_name);
+                stopRecord();
+                return;
+            }
+        }
+
+        //play file
+        final String file_path = AppConfig.getNormalChatFilePath(grp_id , audio_file_name);
+        if(TextUtils.isEmpty(file_path)) {
+            Log.e(log_label , "empty file");
+            return;
+        }
+
+        Log.d(log_label , "playing file_path:" + file_path);
+        playing_file_name = audio_file_name;
+        //player
+        if(mPlayer == null) {
+            mPlayer = new MediaPlayer();
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    Log.d(log_label , "complete:" + file_path);
+                    //播放完毕
+                    stopRecord();
+                }
+            });
+
+        }
+        try {
+            mPlayer.setDataSource(file_path);
+            mPlayer.setLooping(false);
+            mPlayer.prepare();
+            mPlayer.start();
+            playing_voice = true;
+            btn_send_chat.setVisibility(View.GONE);
+            pb_progress.setVisibility(View.VISIBLE);
+            TickSeconds(last_time);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //total_seconds < 100
+    private void TickSeconds(final int total_seconds) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String log_label = "TickSeconds";
+                //wait and tick
+                int v = 0;
+                int couting = 0;
+                while (v<=total_seconds && playing_voice) {
+                    try {
+                        pb_progress.setProgress(v*100/total_seconds);
+                        Thread.sleep(100); //sleep
+                        couting++;
+                        if(couting >= 10) {
+                            v++;
+                            couting = 0;
+                        }
+                    } catch (InterruptedException b) {
+                        b.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
     }
 
 
@@ -587,6 +750,7 @@ public class ChatDetailActivity extends Activity {
             ll_face_panel.setVisibility(View.VISIBLE);
     }
 
+
     public void onChooseVideoClick(View v) {
         //弹出对话框
         AlertDialog.Builder builder = new AlertDialog.Builder(ChatDetailActivity.this);
@@ -634,7 +798,7 @@ public class ChatDetailActivity extends Activity {
                 update_video_url_str = "";
 
                 //show text
-                DialogDisplayText();
+                DialogDisplayText(false);
             }
         });
 
@@ -695,11 +859,63 @@ public class ChatDetailActivity extends Activity {
                 bmp_upload_img = null;
 
                 //show text
-                DialogDisplayText();
+                DialogDisplayText(false);
             }
         });
     }
 
+    public void onChooseVoiceClick(View v) {
+        String log_label = "onChooseVoiceClick";
+        //弹出对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(ChatDetailActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(ChatDetailActivity.this);
+        View root_v = inflater.inflate(R.layout.normal_dialog , null);
+        TextView tv_title = root_v.findViewById(R.id.tv_normal_dialog_title);
+        tv_title.setText("请选择");
+        Button bt_ok = root_v.findViewById(R.id.bt_normal_dialog_ok);
+        bt_ok.setText("录制");
+        Button bt_cancel = root_v.findViewById(R.id.bt_normal_dialog_cancel);
+        bt_cancel.setText("清除");
+        final Dialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setContentView(root_v);
+
+
+        //ok
+        bt_ok.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v)
+            {
+                //create
+                dialog.dismiss();
+                jump_to = JUMP_TO_AUDIO;
+                Intent intent = new Intent("AudioRecord");
+                startActivity(intent);
+                overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+            }
+        });
+
+        //cancel
+        bt_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //nothing
+                dialog.dismiss();
+                //show text
+                DialogDisplayText(true);
+            }
+        });
+    }
+
+
+    public void onChooseVoiceClickTmp(View v) {
+        String log_label = "onChooseVoiceClick";
+        Log.d(log_label , "done");
+
+        jump_to = JUMP_TO_AUDIO;
+        Intent intent = new Intent("AudioRecord");
+        startActivity(intent);
+        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
@@ -820,6 +1036,28 @@ public class ChatDetailActivity extends Activity {
         send_type = CSProto.CHAT_MSG_TYPE_MP4;
     }
 
+    private void DialogDisplayVoice() {
+        String log_label = "DialogDisplayVoice";
+        if(TextUtils.isEmpty(AppConfig.RecordAudioFile))
+            return;
+
+        Log.d(log_label , "audio file:" + AppConfig.RecordAudioFile);
+        //show text
+        //handle
+        TextView tv_send = (TextView)dialog.findViewById(R.id.send_dialog_content);
+        tv_send.setVisibility(View.VISIBLE);
+        //set words
+        String title = "[[语音]]" + AppConfig.RecordAudioFile;
+        tv_send.setText(title);
+
+        ImageView iv_send = (ImageView) dialog.findViewById(R.id.send_dialog_iv_content);
+        iv_send.setVisibility(View.GONE);
+        iv_send.setImageDrawable(null);
+
+        send_type = CSProto.CHAT_MSG_TYPE_VOICE;
+    }
+
+
 
     private void DialogDisplayImage() {
         if(bmp_upload_img == null)
@@ -837,14 +1075,15 @@ public class ChatDetailActivity extends Activity {
         send_type = CSProto.CHAT_MSG_TYPE_IMG;
     }
 
-    private void DialogDisplayText() {
+    private void DialogDisplayText(boolean clear_content) {
         String log_label = "DialogDisplayText";
         if(dialog == null)
             return;
 
         //handle
-        TextView tv_send = (TextView)dialog.findViewById(R.id.send_dialog_content);
+        TextView tv_send = dialog.findViewById(R.id.send_dialog_content);
         tv_send.setVisibility(View.VISIBLE);
+        tv_send.setText("");
 
         ImageView iv_send = (ImageView) dialog.findViewById(R.id.send_dialog_iv_content);
         iv_send.setVisibility(View.GONE);
@@ -919,7 +1158,7 @@ public class ChatDetailActivity extends Activity {
             }
         });
         //choose image and listener
-        ImageView iv_choose_img = (ImageView)dialog.findViewById(R.id.iv_send_dialog_choose_pic);
+        ImageView iv_choose_img = dialog.findViewById(R.id.iv_send_dialog_choose_pic);
         iv_choose_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -927,7 +1166,7 @@ public class ChatDetailActivity extends Activity {
             }
         });
 
-        ImageView iv_choose_video = (ImageView)dialog.findViewById(R.id.iv_send_dialog_choose_video);
+        ImageView iv_choose_video = dialog.findViewById(R.id.iv_send_dialog_choose_video);
         iv_choose_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -935,9 +1174,17 @@ public class ChatDetailActivity extends Activity {
             }
         });
 
+        ImageView iv_choose_voice = dialog.findViewById(R.id.iv_send_dialog_choose_voice);
+        iv_choose_voice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onChooseVoiceClick(view);
+            }
+        });
+
 
         //choose emoji and listener
-        ImageView iv_default_emoji = (ImageView)dialog.findViewById(R.id.iv_send_dialog_default_emoji);
+        ImageView iv_default_emoji = dialog.findViewById(R.id.iv_send_dialog_default_emoji);
         iv_default_emoji.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -946,7 +1193,7 @@ public class ChatDetailActivity extends Activity {
         });
 
         //select send_img and listener
-        ImageView iv_show_send_img = (ImageView)dialog.findViewById(R.id.send_dialog_iv_content);
+        ImageView iv_show_send_img = dialog.findViewById(R.id.send_dialog_iv_content);
         iv_show_send_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -992,7 +1239,7 @@ public class ChatDetailActivity extends Activity {
             if(send_type == CSProto.CHAT_MSG_TYPE_IMG) {
                 send_chat_img();
                 //reset
-                DialogDisplayText();
+                DialogDisplayText(true);
                 break;
             }
 
@@ -1000,7 +1247,15 @@ public class ChatDetailActivity extends Activity {
             if(send_type == CSProto.CHAT_MSG_TYPE_MP4) {
                 send_chat_video();
                 //reset
-                DialogDisplayText();
+                DialogDisplayText(true);
+                break;
+            }
+
+            //send voice
+            if(send_type == CSProto.CHAT_MSG_TYPE_VOICE) {
+                send_chat_voice(AppConfig.RecordAudioFile);
+                //reset
+                DialogDisplayText(true);
                 break;
             }
 
@@ -1008,6 +1263,42 @@ public class ChatDetailActivity extends Activity {
 
         }while (false);
     }
+
+    private void send_chat_voice(String voice_file_name) {
+        String log_label = "send_chat_voice";
+        if(dialog == null) {
+            Log.e(log_label , "dialog null");
+            AppConfig.PrintInfo(this , "发送出错");
+            return;
+        }
+
+        if(TextUtils.isEmpty(voice_file_name)) {
+            Log.e(log_label , "file null");
+            AppConfig.PrintInfo(this , "语音为空");
+            return;
+        }
+
+        //upload
+        //Get Random FileAddr
+        file_serv_info = AppConfig.GetFileServ(-1);
+        if(file_serv_info == null) {
+            Log.e(log_label , "get file serv failed!");
+            AppConfig.PrintInfo(this , "系统错误");
+            return;
+        }
+
+        //Send Chat Img
+        long tmp_id = AppConfig.CurrentUnixTimeMilli();
+        add_temp_sending_msg(tmp_id);
+        String upload_query = AppConfig.FileAddr2UploadUrl(file_serv_info.Addr);
+        new UpdateTempFileTask().execute(upload_query , Long.toString(tmp_id) , voice_file_name);
+
+
+        //hide
+        dialog.dismiss();
+    }
+
+
 
     private void send_chat_video() {
         String log_label = "send_chat_video";
@@ -1033,8 +1324,10 @@ public class ChatDetailActivity extends Activity {
         }
 
         //Send Chat Img
+        long tmp_id = AppConfig.CurrentUnixTimeMilli();
+        add_temp_sending_msg(tmp_id);
         String upload_query = AppConfig.FileAddr2UploadUrl(file_serv_info.Addr);
-        new UpdateChatVideoTask().execute(upload_query);
+        new UpdateChatVideoTask().execute(upload_query , Long.toString(tmp_id));
 
         //hide
         dialog.dismiss();
@@ -1064,12 +1357,79 @@ public class ChatDetailActivity extends Activity {
         }
 
         //Send Chat Img
+        long tmp_id = AppConfig.CurrentUnixTimeMilli();
+        add_temp_sending_msg(tmp_id);
         String upload_query = AppConfig.FileAddr2UploadUrl(file_serv_info.Addr);
-        new UpdateChatImgTask().execute(upload_query);
+        new UpdateChatImgTask().execute(upload_query , Long.toString(tmp_id));
 
         //hide
         dialog.dismiss();
     }
+
+    private void add_temp_sending_msg(long tmp_id) {
+        String log_label = "add_temp_sending_msg";
+        ChatEntity chat = new ChatEntity();
+        long snd_ts = AppConfig.CurrentUnixTime();
+
+        //SET ENTITY
+        chat.setComeMsg(false);
+        chat.msg_id = 0;
+        chat.chatTime = AppConfig.ConverUnixTime2MinStr(snd_ts);
+        chat.content = "正在发送...";
+        chat.userName = AppConfig.UserName;
+        chat.uid = UserInfo.SYS_UID;
+        chat.chat_flag = ChatInfo.CHAT_FLAG_NORMAL;
+        chat.chat_type = CSProto.CHAT_MSG_TYPE_TEXT;
+        chat.tmp_id = tmp_id;
+        Log.d(log_label , "msg_id:" + chat.msg_id + " content:" + chat.content + " tmp_id:" + chat.tmp_id);
+        //Insert
+        chatList.add(chat);
+        chatListView.setSelection(chatList.size()-1);
+        chatAdapter.notifyDataSetChanged();
+    }
+
+    private void clear_temp_sending_msg() {
+        String log_label = "clear_temp_sending_msg";
+        UserChatGroup u_group = UserInfo.getChatGrp(grp_id);
+        if(u_group == null) {
+            Log.e(log_label , "u_group nil! grp_id:" + grp_id);
+            return;
+        }
+        if(u_group.recved_tmp_list.size() <= 0) {
+            Log.d(log_label , "recv_tmp_list empty!");
+            return;
+        }
+
+        //copy
+        ArrayList<Long> tmp_id_list = new ArrayList<>();
+        for(int i=0; i<u_group.recved_tmp_list.size(); i++) {
+            tmp_id_list.add(u_group.recved_tmp_list.get(i));
+        }
+        u_group.recved_tmp_list.clear();
+
+        //clear
+
+        long tmp_id;
+        int removed = 0;
+        for(int i=0; i<chatList.size(); i++) {
+            if(chatList.get(i).tmp_id==0)
+                continue;
+            if(removed == tmp_id_list.size())
+                break;
+
+            //search
+            tmp_id = chatList.get(i).tmp_id;
+            for(int j=0; j<tmp_id_list.size(); j++) {
+                if (tmp_id == tmp_id_list.get(j)) {
+                    Log.d(log_label, "match tmp_id:" + tmp_id);
+                    chatList.remove(i);
+                    removed++;
+                    break;
+                }
+            }
+        }
+    }
+
 
 
     private void send_chat_text() {
@@ -1110,9 +1470,11 @@ public class ChatDetailActivity extends Activity {
         dialog.dismiss();
         et_send_content.setText("");
 
-        //开启发送DIALOG
+
         //Send
-        String query = CSProto.CSSendChatReq(CSProto.CHAT_MSG_TYPE_TEXT , grp_id , content);
+        long tmp_id = AppConfig.CurrentUnixTimeMilli();
+        add_temp_sending_msg(tmp_id);
+        String query = CSProto.CSSendChatReq(CSProto.CHAT_MSG_TYPE_TEXT , grp_id , content , tmp_id);
         AppConfig.SendMsg(query);
     }
 
@@ -1638,6 +2000,7 @@ public class ChatDetailActivity extends Activity {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
+                                clear_temp_sending_msg();
                                 LoadChatItem(grp_id , LOAD_FLAG_NEW);
                             }
                         });
@@ -1754,6 +2117,26 @@ public class ChatDetailActivity extends Activity {
     }
 
 
+    private void TryLoadVoiceFile(long msg_id , String chat_url , String file_name) {
+        String log_label = "TryLoadVoiceFile";
+        //arg check
+        if(msg_id<=0 || chat_url==null || chat_url.length()<=0 || file_name==null || file_name.length()<=0) {
+            Log.e(log_label , "arg illegal!");
+            return;
+        }
+
+        //get query
+        String file_query = AppConfig.ParseServerUrl(chat_url);
+        if(file_query==null || file_query.length()<=0) {
+            Log.e(log_label , "parse chat_url failed!");
+            return;
+        }
+        Log.d(log_label , "file_query:" + file_query + " file_name:" + file_name);
+        //query
+        new LoadVoiceFileTask().execute(file_query , Long.toString(msg_id) , file_name);
+    }
+
+
     private void SetMsgImg(long msg_id , Bitmap bmp_content) {
         String log_label = "SetMsgImg";
         //check
@@ -1777,6 +2160,32 @@ public class ChatDetailActivity extends Activity {
         return;
     }
 
+
+    private void SetMsgVoice(long msg_id , long voice_time) {
+        String log_label = "SetMsgVoice";
+        //check
+        if(msg_id<=0) {
+            Log.e(log_label , "arg null");
+            return;
+        }
+
+        //get
+        ChatEntity entity = null;
+        for(int i=0; i<chatList.size(); i++) {
+            entity = chatList.get(i);
+            if(entity.msg_id == msg_id) {
+                Log.d(log_label , "found msg_id:" + msg_id + " time:" + voice_time);
+                //get file_path
+                entity.last_time = voice_time; //ms --> second
+                chatAdapter.notifyDataSetChanged();
+                break;
+            }
+        }
+
+        return;
+    }
+
+
     private void SetMsgVideo(long msg_id , Bitmap bmp_snap , long video_time) {
         String log_label = "SetMsgVideo";
         //check
@@ -1798,7 +2207,7 @@ public class ChatDetailActivity extends Activity {
                 } else {
                     Log.i(log_label , "file_path done! file_path:" + file_path);
                     entity.bmp_content = bmp_snap;
-                    entity.video_time = video_time/1000; //ms --> second
+                    entity.last_time = video_time/1000; //ms --> second
                     chatAdapter.notifyDataSetChanged();
                 }
                 break;
@@ -1841,6 +2250,105 @@ public class ChatDetailActivity extends Activity {
 
         return bmp_dest;
     }
+
+    /*
+     * Load from Local or Load from Net exclude image
+     * HTTPSTRINGYTASK
+     */
+    private class LoadVoiceFileTask extends AsyncTask<String, Void, byte[]>
+    {
+        private long msg_id = 0;
+        private String file_name = "";
+        private boolean from_local = false;
+        private String log_label = "LoadVoiceFileTask";
+        String file_path = "";
+        private long last_time = 0;
+        @Override
+        protected byte[] doInBackground(String... params)
+        {
+            InputStream input_stream = null;
+            msg_id = Long.parseLong(params[1]);
+            file_name = params[2];
+            byte[] data = null;
+            try
+            {
+                //first check from local
+                file_path = AppConfig.getNormalChatFilePath(grp_id , file_name);
+                if(!TextUtils.isEmpty(file_path)) {
+                    Log.d(log_label , "file exist! file_path:" + file_path);
+                    last_time = AppConfig.getAmrDuration(file_path);
+                    from_local = true;
+                    return null;
+                }
+
+                Log.d(log_label , "load from net! file:" + file_name);
+                /*open connection*/
+                URL url = new URL(params[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(10 * 1000);
+                conn.setAllowUserInteraction(false);
+                conn.setInstanceFollowRedirects(true);
+                conn.setRequestMethod("GET");
+
+                if(conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+                {
+                    input_stream = conn.getInputStream();
+                    data = AppConfig.ReadInput2Bytes(input_stream);
+                    input_stream.close();
+                }
+
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return data;
+        }
+
+        @Override
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         * result形式:
+         * [01](&time:tag:author)*
+         */
+        protected void onPostExecute(byte[] data)
+        {
+            if(data == null) {
+                if(from_local) //from local
+                    SetMsgVoice(msg_id , last_time);
+                return;
+            }
+
+            /*Parse BITMAP*/
+            try
+            {
+                if(data != null)
+                {
+                    if(!from_local) { //from net will save to local
+                        Log.i(log_label, "download file done");
+                        AppConfig.saveNormalChatFile(grp_id , data , file_name);
+                        //set snap
+                        file_path = AppConfig.getNormalChatFilePath(grp_id , file_name);
+                        last_time = AppConfig.getAmrDuration(file_path);
+                        SetMsgVoice(msg_id, last_time);
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 
 
     /*
@@ -2056,6 +2564,129 @@ public class ChatDetailActivity extends Activity {
 
     }
 
+    /*
+     * Task
+     */
+    private class UpdateTempFileTask extends AsyncTask<String, Void, String>
+    {
+        String log_label = "UpdateTempFileTask";
+        InputStream input_stream = null;
+        long tmp_id = 0;
+        String temp_file_name = "";
+        @Override
+        protected String doInBackground(String... params)
+        {
+            String result = null;
+            tmp_id = Long.parseLong(params[1]);
+            temp_file_name = params[2];
+            if(file_serv_info == null) {
+                Log.e(log_label , "file_serv_info null!");
+                return null;
+            }
+
+            if(TextUtils.isEmpty(temp_file_name)) {
+                Log.e(log_label , "temp_file_name null!");
+                return null;
+            }
+
+            String file_path = AppConfig.GetTempMiscFilePath(temp_file_name);
+            if(TextUtils.isEmpty(file_path)) {
+                Log.e(log_label , "file_path null!");
+                return null;
+            }
+
+            File temp_file = new File(file_path);
+            if(!temp_file.exists()) {
+                Log.e(log_label , "file not exist!");
+                return null;
+            }
+
+
+            try
+            {
+                //open inputstream
+                InputStream update_is = null;
+                update_is = new FileInputStream(temp_file);
+                if(update_is == null) {
+                    Log.e(log_label , "update_is null! file:" + temp_file_name);
+                    return null;
+                }
+
+                /*open connection*/
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("url_type", AppConfig.URL_TYPE_CHAT);
+                map.put("uid", AppConfig.UserUid);
+                map.put("grp_id", grp_id);
+                map.put("tmp_id", tmp_id);
+                map.put("token", file_serv_info.Token);
+                Log.d(log_label , "uid:" + AppConfig.UserUid + " grp_id:" + grp_id + " tmp_id:" + tmp_id);
+                ArrayList<InputStream> is_list = new ArrayList<InputStream>();
+                is_list.add(update_is);
+
+                input_stream = AppConfig.uploadFile(params[0] , map , is_list);
+                if(input_stream == null)
+                {
+                    return null;
+                }
+
+                /*read input*/
+                result = AppConfig.ReadInputStream(input_stream);
+                input_stream.close();
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        @Override
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         * result形式:
+         * [01](&time:tag:author)*
+         */
+        protected void onPostExecute(String result)
+        {
+            Log.d(log_label, "result:" + result);
+            if(result == null || result.length()<=0)
+            {
+                return ;
+            }
+
+            /*Parse JSON*/
+            try
+            {
+                JSONTokener parser = new JSONTokener(result);
+
+                //1.get root
+                JSONObject root = (JSONObject)parser.nextValue();
+
+                //2.get ret
+                if(root.getInt("result") == CSProto.COMMON_RESULT_SUCCESS)
+                {
+                    AppConfig.PrintInfo(getBaseContext(), "发送成功");
+                }
+                else
+                {
+                    AppConfig.PrintInfo(getBaseContext(), "发送失败");
+                }
+                return;
+
+            }
+            catch(JSONException e)
+            {
+                e.printStackTrace();
+            }
+
+
+        }
+
+    }
+
+
 
     /*
      * Task
@@ -2064,10 +2695,12 @@ public class ChatDetailActivity extends Activity {
     {
         String log_label = "UpdateChatVideoTask";
         InputStream input_stream = null;
+        long tmp_id = 0;
         @Override
         protected String doInBackground(String... params)
         {
             String result = null;
+            tmp_id = Long.parseLong(params[1]);
             if(file_serv_info == null) {
                 Log.e(log_label , "file_serv_info null!");
                 return null;
@@ -2094,9 +2727,9 @@ public class ChatDetailActivity extends Activity {
                 map.put("url_type", AppConfig.URL_TYPE_CHAT);
                 map.put("uid", AppConfig.UserUid);
                 map.put("grp_id", grp_id);
-                map.put("tmp_id", 111);
+                map.put("tmp_id", tmp_id);
                 map.put("token", file_serv_info.Token);
-
+                Log.d(log_label , "uid:" + AppConfig.UserUid + " grp_id:" + grp_id + " tmp_id:" + tmp_id);
                 ArrayList<InputStream> is_list = new ArrayList<InputStream>();
                 is_list.add(video_is);
 
@@ -2177,10 +2810,12 @@ public class ChatDetailActivity extends Activity {
     {
         String log_label = "UpdateChatImgTask";
         InputStream input_stream = null;
+        long tmp_id = 0;
         @Override
         protected String doInBackground(String... params)
         {
             String result = null;
+            tmp_id = Long.parseLong(params[1]);
             if(file_serv_info == null) {
                 Log.e(log_label , "file_serv_info null!");
                 return null;
@@ -2211,9 +2846,9 @@ public class ChatDetailActivity extends Activity {
                 map.put("url_type", AppConfig.URL_TYPE_CHAT);
                 map.put("uid", AppConfig.UserUid);
                 map.put("grp_id", grp_id);
-                map.put("tmp_id", 111);
+                map.put("tmp_id", tmp_id);
                 map.put("token", file_serv_info.Token);
-
+                Log.d(log_label , "uid:" + AppConfig.UserUid + " grp_id:" + grp_id + " tmp_id:" + tmp_id);
                 ArrayList<InputStream> is_list = new ArrayList<InputStream>();
                 is_list.add(img_is);
 

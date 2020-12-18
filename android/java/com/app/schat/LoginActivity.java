@@ -16,6 +16,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText login_pass;
 
     Button login_submit;
-
+    TextView tv_login_progress;
+    FrameLayout fl_login_progress;
     String UserName = "";
     String Password = "";
 
@@ -36,9 +40,10 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences shared_data;
     private SharedPreferences.Editor editor;
     char saved_before = 0;	/*之前是否保存*/
-    private ProgressDialog progress_dialog;
-    private static Handler handler;
+    private ProgressBar progress_bar;
+    private Handler handler;
     private String log_label = "login";
+    private boolean login_ready = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,9 @@ public class LoginActivity extends AppCompatActivity {
         login_user = (EditText)findViewById(R.id.login_user);
         login_pass = (EditText)findViewById(R.id.login_pass);
         login_submit = (Button)findViewById(R.id.login_submit);
+        progress_bar = (ProgressBar)findViewById(R.id.login_progress);
+        tv_login_progress = (TextView)findViewById(R.id.tv_login_progress);
+        fl_login_progress = (FrameLayout)findViewById(R.id.fl_login_progress);
         /*get shared*/
         shared_data = getSharedPreferences(AppConfig.PGPREFS, AppConfig.PGPREFS_MOD);
         editor = shared_data.edit();
@@ -77,6 +85,18 @@ public class LoginActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        //check net
+        /*
+        progress_dialog = new ProgressDialog(LoginActivity.this);
+        progress_dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress_dialog.setMessage("正在检查网络...");
+        progress_dialog.setIcon(R.drawable.ic_launcher_background);
+        progress_dialog.setIndeterminate(false);
+        progress_dialog.setCancelable(true);
+        progress_dialog.show();*/
+        //AppConfig.PrintInfo(this , "正在检查网络...");
+        tv_login_progress.setText("正在检查网络...");
+        CheckNet();
     }
 
     @Override
@@ -144,6 +164,11 @@ public class LoginActivity extends AppCompatActivity {
             AppConfig.PrintInfo(this , "您已登陆");
             return;
         }
+        if(!login_ready) {
+            AppConfig.PrintInfo(this , "网络未准备好");
+            return;
+        }
+
         UserName = login_user.getText().toString();
         Password = login_pass.getText().toString();
 
@@ -172,24 +197,80 @@ public class LoginActivity extends AppCompatActivity {
 
 
 		//AppConfig.PrintInfo(this, "正在提交...用户名：" + UserName + " 密码：" + Password);
+        /*
         progress_dialog = new ProgressDialog(LoginActivity.this);
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress_dialog.setMessage("正在登陆...");
         progress_dialog.setIcon(R.drawable.ic_launcher_background);
         progress_dialog.setIndeterminate(false);
         progress_dialog.setCancelable(true);
-        progress_dialog.show();
+        progress_dialog.show();*/
 
+        fl_login_progress.setVisibility(View.VISIBLE);
+        login_submit.setVisibility(View.GONE);
         //login
         TrytoLogin();
     }
 
+    //validate pubic key sha256
+    private boolean ValidateDig() {
+        String log_label = "ValidateDig";
+        //need check?
+        int valid_count = Integer.parseInt(AppConfig.prop.getProperty("validate_digest"));
+        Log.d(log_label , "validate_digest:" + valid_count);
+        if (valid_count <= 0) {
+            return true;
+        }
+
+        //check
+        for(int i=0; i<valid_count; i++) {
+            //get digest
+            String config_dig = AppConfig.prop.getProperty("pub_sha2_" + i, "");
+            if (TextUtils.isEmpty(config_dig)) {
+                Log.e(log_label, "config dig empty!");
+                continue;
+            }
+
+            //equal
+            if (TextUtils.equals(AppConfig.pub_key_sha2, config_dig)) {
+                Log.d(log_label, "dig validated!");
+                return true;
+            }
+        }
+        Log.e(log_label , "dig not valid! net:" + AppConfig.pub_key_sha2);
+        return false;
+    }
+
+    private void ConnectDone(boolean ok) {
+        String log_label = "ConnectDone";
+        Log.d(log_label , "ok:" + ok);
+
+        //print
+        if(!ok) {
+            tv_login_progress.setText("网络连接错误，请稍后重试");
+            return;
+        }
+
+        //validate dig
+        if(!ValidateDig()) {
+            tv_login_progress.setText("网络信息错误");
+            Log.e(log_label , "dig not passed!");
+            return;
+        }
+
+        //done
+        login_ready = true;
+        fl_login_progress.setVisibility(View.GONE);
+        tv_login_progress.setText("正在登陆...");
+        login_submit.setVisibility(View.VISIBLE);
+    }
+
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void LoginDone() {
         String log_label = "LoginDone";
-        if(progress_dialog != null) {
-            progress_dialog.cancel();
-        }
+
+        fl_login_progress.setVisibility(View.GONE);
         //check result
         switch(AppConfig.login_result) {
             case CSProto.COMMON_RESULT_SUCCESS:
@@ -216,6 +297,7 @@ public class LoginActivity extends AppCompatActivity {
                 break;
         }
         if(AppConfig.login_result != CSProto.COMMON_RESULT_SUCCESS) {
+            login_submit.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -348,6 +430,46 @@ public class LoginActivity extends AppCompatActivity {
         return;
     }
 
+    private void CheckNet() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String log_label = "CheckNet";
+                //wait and check resp
+                int v = 0;
+                while (v<=AppConfig.REQ_TIMEOUT) {
+                    try {
+                        progress_bar.setProgress(v*100/AppConfig.REQ_TIMEOUT);
+                        if(ChatClient.Connected()) {
+                            Log.i(log_label , "connected");
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run()
+                                {
+                                    ConnectDone(true);
+                                }
+                            });
+                            return;
+                        }
+                        Thread.sleep(700); //sleep
+                        v++;
+                    } catch (InterruptedException b) {
+                        b.printStackTrace();
+                    }
+                }
+                Log.e(log_label , "req timeout");
+                handler.post(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        ConnectDone(false);
+                    }
+                });
+            }
+        }).start();
+    }
+
+
 
     private void TrytoLogin() {
         new Thread(new Runnable() {
@@ -365,6 +487,7 @@ public class LoginActivity extends AppCompatActivity {
                 int v = 0;
                 while (v<=AppConfig.REQ_TIMEOUT) {
                     try {
+                        progress_bar.setProgress(v*100/AppConfig.REQ_TIMEOUT);
                         if(AppConfig.common_op_lock.get() == false) {
                             Log.i("Login" , "finish");
                             handler.post(new Runnable() {
@@ -378,7 +501,7 @@ public class LoginActivity extends AppCompatActivity {
                             });
                             return;
                         }
-                        Thread.sleep(1000); //sleep
+                        Thread.sleep(700); //sleep
                         v++;
                     } catch (InterruptedException b) {
                         b.printStackTrace();
@@ -386,9 +509,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 //end while
                 AppConfig.common_op_lock.set(false);
-                if (progress_dialog != null) {
-                    progress_dialog.cancel();
-                }
                 Log.e(log_label , "req timeout");
             }
         }).start();
@@ -456,6 +576,19 @@ public class LoginActivity extends AppCompatActivity {
         AppConfig.GROUP_HEAD_DIR_PATH = dir_path;
         Log.d(log_label , "group_head dir:" + AppConfig.GROUP_HEAD_DIR_PATH);
 
+        //temp dir
+        dir_path = AppConfig.ABSOLUTE_DATA_DIR_PATH + "/temp_misc";
+        f_dir = new File(dir_path);
+        if(!f_dir.exists())
+        {
+            f_dir.mkdirs();
+            Log.i(log_label , "create temp_misc dir:" + dir_path);
+        }
+        AppConfig.TEMP_MISC_DIR_PATH = dir_path;
+        Log.d(log_label , "temp_misc dir:" + AppConfig.TEMP_MISC_DIR_PATH);
+
+          //clear temp dir
+        AppConfig.DeleteFile(f_dir);
 
     }
 

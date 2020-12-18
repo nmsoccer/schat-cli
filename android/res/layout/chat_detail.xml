@@ -60,24 +60,30 @@
         </LinearLayout>  
     </RelativeLayout>  
       
-    <RelativeLayout   
+    <FrameLayout
         android:id="@+id/chat_detail_rl_bottom"  
         android:layout_alignParentBottom="true" 
         android:layout_width="fill_parent"     
         android:layout_height="wrap_content">
         
         <Button
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/button_color_blue"
             android:onClick="onClickSendMsg"
             android:textColor="@color/bg_white"
             android:layout_marginTop="5dp"
+			android:id="@+id/chat_detail_btn_send"
             android:text="回复"
             />        
         
-	     
-    </RelativeLayout>  
+	     <ProgressBar
+			 android:visibility="gone"
+			 android:layout_width="match_parent"
+			 android:layout_height="40dp"
+			 style="@android:style/Widget.ProgressBar.Horizontal"
+			 android:id="@+id/chat_detail_pb_progress"/>
+    </FrameLayout>
       
     <ListView   
         android:id="@+id/chat_detail_listview"         

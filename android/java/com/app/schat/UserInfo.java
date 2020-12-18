@@ -4,7 +4,9 @@ package com.app.schat;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -52,6 +54,7 @@ class UserChatGroup {
     public String last_msg;
     public AtomicBoolean new_msg;
     public long local_last_ts;
+    public List<Long> recved_tmp_list;
 
 
     public UserChatGroup() {
@@ -64,6 +67,7 @@ class UserChatGroup {
         this.serv_last_msg_id = 0;
         this.new_msg = new AtomicBoolean(false);
         this.local_last_chat_type = CSProto.CHAT_MSG_TYPE_TEXT;
+        this.recved_tmp_list = Collections.synchronizedList(new ArrayList<Long>());
     }
 
 }

@@ -201,7 +201,7 @@ public class SysSetActivity extends AppCompatActivity {
 
         progress_dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress_dialog.setProgress(100);
-        progress_dialog.setMessage("sending...");
+        progress_dialog.setMessage("正在设置...");
         progress_dialog.setIndeterminate(false);
         progress_dialog.show();
 

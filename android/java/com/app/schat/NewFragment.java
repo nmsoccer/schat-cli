@@ -196,6 +196,10 @@ public class NewFragment extends Fragment implements OnItemClickListener {
                 chatHolder.tv_content.setVisibility(View.GONE);
                 chatHolder.iv_content.setVisibility(View.VISIBLE);
                 chatHolder.iv_content.setImageDrawable(getResources().getDrawable(R.drawable.video_choose));
+            } else if(chat_type == CSProto.CHAT_MSG_TYPE_VOICE) {
+                chatHolder.tv_content.setVisibility(View.GONE);
+                chatHolder.iv_content.setVisibility(View.VISIBLE);
+                chatHolder.iv_content.setImageDrawable(getResources().getDrawable(R.drawable.voice_choose));
             } else {
                 chatHolder.tv_content.setVisibility(View.VISIBLE);
                 chatHolder.iv_content.setVisibility(View.GONE);

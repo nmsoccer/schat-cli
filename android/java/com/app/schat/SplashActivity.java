@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,7 +22,9 @@ import org.json.JSONTokener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 public class SplashActivity extends AppCompatActivity {
     private SharedPreferences shared_data;
@@ -28,10 +33,14 @@ public class SplashActivity extends AppCompatActivity {
     private EditText et_server_name;
     private EditText et_server_addr;
     private Button btn_ok;
+    private FrameLayout fl_progress;
+    private ProgressBar pb_progress;
+    private TextView tv_progress;
 
     private String server_space = "";
     private String dir_addr = "";
-
+    private String dir_query_key = "";
+    private boolean check_thread_alive = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String log_label = "splash.create";
@@ -61,14 +70,48 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
+        /*Get Properties*/
+        AppConfig.prop = PropertiesUtil.load_properties(this);
+        if(AppConfig.prop == null) {
+            Log.e(log_label , "load properties failed!");
+            AppConfig.PrintInfo(this , "配置加载出错");
+            return;
+        }
+        Log.d(log_label , "app_name:" + AppConfig.prop.getProperty("app_name"));
+
+        //get query key
+        dir_query_key = AppConfig.prop.getProperty("dir_query_key" , "");
+        if(TextUtils.isEmpty(dir_query_key)) {
+            Log.e(log_label , "dir query key empty!");
+            AppConfig.PrintInfo(this , "配置加载出错");
+            return;
+        }
+
+        //other properties
+        AppConfig.version = AppConfig.prop.getProperty("version" , "0.0.0");
+
+
         if(AppConfig.IsLogin())
             return;
 
-        //NoCheckCert
-        if(!AppConfig.HttpsCertNoCheck()) {
-            Log.e(log_label , "set https cert failed!");
-            AppConfig.PrintInfo(this , "HTTP设置错误");
-            return;
+        //Cert
+        int self_cert = Integer.parseInt(AppConfig.prop.getProperty("self_signed_cert_open" , ""));
+        if(self_cert == 0) {    //no need cert check
+            if (!AppConfig.HttpsCertNoCheck()) {
+                Log.e(log_label, "set https cert failed!");
+                AppConfig.PrintInfo(this, "HTTP设置错误");
+                return;
+            }
+            Log.d(log_label , "set cert no check done!");
+        } else {    //only trust self server cert
+            String bks_file = AppConfig.prop.getProperty("bks_file" , "");
+            String bks_pass = AppConfig.prop.getProperty("bks_pass" , "");
+            if (!AppConfig.HttpCertSelf(this , bks_file , bks_pass)) {
+                Log.e(log_label, "self cert failed!");
+                AppConfig.PrintInfo(this, "证书错误,请检查");
+                return;
+            }
+            Log.d(log_label, "self cert done!");
         }
 
 
@@ -85,6 +128,9 @@ public class SplashActivity extends AppCompatActivity {
         et_server_name = (EditText)this.findViewById(R.id.splash_server_name);
         et_server_name.setHint(server_space);
         et_server_addr = (EditText)this.findViewById(R.id.splash_server_addr);
+        fl_progress = (FrameLayout)this.findViewById(R.id.fl_splash_progress);
+        pb_progress = (ProgressBar)this.findViewById(R.id.pb_splash_progress);
+        tv_progress = (TextView)this.findViewById(R.id.tv_splash_progress);
         btn_ok = (Button)this.findViewById(R.id.bt_splash_enter);
         if(dir_addr.length() > 0)
             et_server_addr.setHint(dir_addr);
@@ -124,7 +170,9 @@ public class SplashActivity extends AppCompatActivity {
 
         //query
         btn_ok.setVisibility(View.GONE); //not now
-        String query = "https://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
+        fl_progress.setVisibility(View.VISIBLE);
+        DirConnecting();
+        String query = "https://" + dir_addr + "/query?query_key=" + dir_query_key;
         new DirIPTask().execute(query);
     }
 
@@ -145,13 +193,51 @@ public class SplashActivity extends AppCompatActivity {
 
                 //query
                 btn_ok.setVisibility(View.GONE); //not now
-                String query = "https://" + dir_addr + "/query?query_key=" + AppConfig.Dir_QUERY_KEY;
+                fl_progress.setVisibility(View.VISIBLE);
+                DirConnecting();
+                String query = "https://" + dir_addr + "/query?query_key=" + dir_query_key;
                 new DirIPTask().execute(query);
                 break;
             default:
                 //nothing
         }
 
+    }
+
+    private void DirConnecting() {
+        check_thread_alive = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String log_label = "DirConnecting";
+                //wait and check resp
+                int v = 0;
+                while (v<=AppConfig.REQ_TIMEOUT) {
+                    if(!check_thread_alive) {
+                        Log.d(log_label , "try exit...");
+                        return;
+                    }
+
+                    try {
+                        pb_progress.setProgress(v*100/AppConfig.REQ_TIMEOUT);
+                        Thread.sleep(1200); //sleep
+                        v++;
+                    } catch (InterruptedException b) {
+                        b.printStackTrace();
+                    }
+                }
+                Log.e(log_label , "req timeout");
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        String log_label = "splash.on_destroy";
+        super.onDestroy();
+        Log.d(log_label , "done");
+        check_thread_alive = false;
     }
 
     /*
@@ -208,6 +294,8 @@ public class SplashActivity extends AppCompatActivity {
                 Log.e(log_label , "result empty");
                 AppConfig.PrintInfo(getBaseContext() , "连接失败");
                 btn_ok.setVisibility(View.VISIBLE);
+                fl_progress.setVisibility(View.GONE);
+                check_thread_alive = false;
                 return ;
             }
 
@@ -227,14 +315,19 @@ public class SplashActivity extends AppCompatActivity {
                 {
                     AppConfig.PrintInfo(getBaseContext(), "获取地址失败");
                     btn_ok.setVisibility(View.VISIBLE);
+                    fl_progress.setVisibility(View.GONE);
+                    check_thread_alive = false;
                     return;
                 }
                 String[] strs = conn_url.split(":");
                 if(strs.length != 2) {
                     AppConfig.PrintInfo(getBaseContext() , "解析地址失败");
                     btn_ok.setVisibility(View.VISIBLE);
+                    fl_progress.setVisibility(View.GONE);
+                    check_thread_alive = false;
                     return;
                 }
+                check_thread_alive = false;
                 AppConfig.ChatServHost = strs[0];
                 AppConfig.ChatServPort = Integer.parseInt(strs[1]);
                 AppConfig.ServerSpace = server_space;
@@ -264,5 +357,6 @@ public class SplashActivity extends AppCompatActivity {
         }
 
     }
+
 
 }
