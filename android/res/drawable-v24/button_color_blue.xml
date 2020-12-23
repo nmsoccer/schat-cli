@@ -7,6 +7,6 @@
     </item>
     
     <item> 
-        <color  android:color="#2c3e50"/>
+        <color  android:color="@color/bg_midnight_blue"/>
     </item>   
 </selector>

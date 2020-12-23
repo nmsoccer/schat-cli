@@ -355,12 +355,15 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //create group local file dir
+        /*
         if(chat_info.all_group > 0) {
             for (long grp_id : chat_info.all_groups.keySet()) {
                 //create group dir
                 AppConfig.CreateGroupFileDir(grp_id);
             }
         }
+         */
+        AppConfig.CreateGroupChatDirs();
 
         //other parse
         InitUserBasic();

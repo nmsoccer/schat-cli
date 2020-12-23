@@ -213,7 +213,7 @@ public class UserInfo {
 
         do {
             //create grp dir
-            AppConfig.CreateGroupFileDir(grp_id);
+            //AppConfig.CreateGroupFileDir(grp_id);
 
             //grp
             UserChatGroup grp_info = all_groups.get(grp_id);

@@ -45,6 +45,7 @@
     <color name="bg_head_menu_choose">#ffffff</color>
 
     <color name="bg_xiaomifontgray">#7c7c7c</color>
+    <color name="bg_chat_img_bak">#969696</color>
     <!--    <color name="bg_xiaomibackgray">#efeff0</color> -->
     <color name="bg_xiaomibackgray">#f5f9fd</color>
     <color name="bg_baobaobackgray">#f0f1f2</color>

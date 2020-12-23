@@ -73,7 +73,7 @@
                 android:layout_height="150dp"
                 android:foregroundGravity="left"
                 android:visibility="gone"
-                android:background="@color/bg_bak_trans"
+                android:background="@color/bg_chat_img_bak"
                 android:id="@+id/chat_item_iv_content"/>
 
             <TextView
@@ -91,8 +91,8 @@
                 />
              <TextView
                  android:layout_gravity="center"
-                 android:layout_width="30dp"
-                 android:layout_height="30dp"
+                 android:layout_width="25dp"
+                 android:layout_height="25dp"
                  android:visibility="gone"
                  android:id="@+id/chat_item_tv_read"
                  android:background="@drawable/read_ok"/>

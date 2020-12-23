@@ -472,6 +472,7 @@ public class ChatDetailActivity extends Activity {
             chatHolder.contentImageView.setImageDrawable(null); //clear bitmap to transparent
             chatHolder.contentImageView.setVisibility(View.GONE);
             chatHolder.durationTextView.setVisibility(View.GONE);
+            chatHolder.contentTextView.setVisibility(View.VISIBLE);
             if(!entity.in_read)
                 chatHolder.readingTextView.setVisibility(View.GONE);
             else
@@ -1844,13 +1845,29 @@ public class ChatDetailActivity extends Activity {
         tv_title.setText("请选择");
         Button bt_ok = (Button)root_v.findViewById(R.id.bt_normal_dialog_ok); //del
         bt_ok.setText("删除");
-        Button bt_mid = (Button)root_v.findViewById(R.id.bt_normal_dialog_mid); //recall
+
+        //recall
+        Button bt_mid = (Button)root_v.findViewById(R.id.bt_normal_dialog_mid);
         if(AppConfig.UserUid == entity.uid && entity.chat_flag == ChatInfo.CHAT_FLAG_NORMAL) {
             bt_mid.setText("撤回");
             bt_mid.setVisibility(View.VISIBLE);
         }
+
+        //copy
         Button bt_cancel = (Button)root_v.findViewById(R.id.bt_normal_dialog_cancel); //copy
         bt_cancel.setText("复制");
+        if(copy_allowed(entity)) {
+            bt_cancel.setVisibility(View.VISIBLE);
+        } else
+            bt_cancel.setVisibility(View.GONE);
+
+        //direct
+        Button bt_forward = (Button)root_v.findViewById(R.id.bt_normal_dialog_forth); //forward
+        if(direct_allowed(entity)) {
+            bt_forward.setVisibility(View.VISIBLE);
+            bt_forward.setText("转发");
+        }
+
         final Dialog dialog = builder.create();
         dialog.show();
         dialog.getWindow().setContentView(root_v);
@@ -1886,44 +1903,72 @@ public class ChatDetailActivity extends Activity {
             }
         });
 
-        /*
-        //弹出对话框
-        AlertDialog.Builder builder = new AlertDialog.Builder(ChatDetailActivity.this);
-        ChatEntity entity = chatList.get(pos);
-        //builder.setIcon(R.drawable.group_main);
-        builder.setTitle("请选择");
-
-
-        //赞
-        builder.setPositiveButton("删除", new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialog, int whichButton)
-            {
-                //quit grup
-                DelLocalChat(pos);
+        //forward
+        bt_forward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                ForwardChat(pos);
             }
         });
 
-        //踩
-        builder.setNegativeButton("复制", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton)
-            {
-                //nothing
-                CopyLocalChat(pos);
-            }
-        });
+    }
 
-        //cancel
-        if(AppConfig.UserUid == entity.uid && entity.chat_flag == ChatInfo.CHAT_FLAG_NORMAL) {
-            builder.setNeutralButton("撤回", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    CancelMsg(pos);
-                }
-            });
+    private boolean copy_allowed(ChatEntity entity) {
+        String log_lable = "copy_allowed";
+        //filt
+        if(entity.chat_type != CSProto.CHAT_MSG_TYPE_TEXT) {
+            Log.e(log_label , "chat type illegal! type:" + entity.chat_type);
+            return false;
         }
 
-        builder.create().show();*/
+        if(entity.chat_flag != ChatInfo.CHAT_FLAG_NORMAL) {
+            Log.e(log_label , "flag illegal! flag:" + entity.chat_flag);
+            return false;
+        }
+
+        if(entity.uid == UserInfo.SYS_UID)
+            return false;
+
+
+        return true;
     }
+
+
+    private boolean direct_allowed(ChatEntity entity) {
+        String log_label = "direct_allowed";
+        //filt
+        if(entity.chat_type <= CSProto.CHAT_MSG_TYPE_TEXT || entity.chat_type >= CSProto.CHAT_MSG_TYPE_VOICE) {
+            Log.e(log_label , "chat type illegal! type:" + entity.chat_type);
+            return false;
+        }
+
+        if(entity.chat_flag != ChatInfo.CHAT_FLAG_NORMAL) {
+            Log.e(log_label , "flag illegal! flag:" + entity.chat_flag);
+            return false;
+        }
+
+        if(entity.uid == UserInfo.SYS_UID)
+            return false;
+
+
+        return true;
+    }
+
+
+    private void ForwardChat(int pos) {
+        String log_label = "ForwardChat";
+        ChatEntity entity = chatList.get(pos);
+
+
+        //start
+        Intent intent = new Intent("ForwardChat");
+        intent.putExtra("chat_type" , entity.chat_type);
+        intent.putExtra("content" , entity.content);
+        startActivity(intent);
+        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+    }
+
 
     private void CancelMsg(int pos) {
         String log_label = "CancelMsg";

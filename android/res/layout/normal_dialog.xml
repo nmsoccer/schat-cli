@@ -65,6 +65,16 @@
                 android:textColor="@color/bg_white"
                 android:background="@drawable/select_white_stroke_gray"
                 android:id="@+id/bt_normal_dialog_cancel"/>
+            <Button
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:text="FR"
+                android:textSize="12sp"
+                android:textColor="@color/bg_white"
+                android:background="@drawable/select_white_stroke_gray"
+                android:id="@+id/bt_normal_dialog_forth"/>
         </LinearLayout>
     </RelativeLayout>
 

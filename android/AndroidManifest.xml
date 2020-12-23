@@ -172,10 +172,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".AudioActivity"
+        <activity
+            android:name=".AudioActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="AudioRecord" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ForwardActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="ForwardChat" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

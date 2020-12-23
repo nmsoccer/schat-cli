@@ -1,5 +1,5 @@
 app_name = schat
-version = 0.0.4
+version = 0.0.5
 dir_query_key = ccddsfff
 #validate conn_server pub-key digest count if 0 no check
 validate_digest = 0

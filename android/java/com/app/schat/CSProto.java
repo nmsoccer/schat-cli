@@ -1665,7 +1665,7 @@ public class CSProto {
         //add
         ChatInfo.AddGroupSnap(g_item);
         UserInfo.EnterGroup(g_item.grp_id , g_item.grp_name , true);
-        AppConfig.CreateGroupFileDir(g_item.grp_id);
+        //AppConfig.CreateGroupFileDir(g_item.grp_id);
         //set result
         AppConfig.create_group_result = result;
     }

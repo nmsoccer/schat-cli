@@ -452,11 +452,36 @@ public class AppConfig {
     public static String GROUP_HEAD_DIR_PATH = null; //群组头像主目录
     public static String TEMP_MISC_DIR_PATH = null;  //临时文件目录
     public static int GROUP_FILE_DIR_MAX = 23;
+    public static int GROUP_CHAT_DIR_HASH = 7;
 
+    /*
     public static String GrpId2FileDir(long grp_id) {
         return "g_" + (grp_id % GROUP_FILE_DIR_MAX);
     }
+     */
 
+    //file_name: md5.xx
+    public static String ChatFileName2Dir(String file_name) {
+        String log_label = "ChatFileName2Dir";
+        if(TextUtils.isEmpty(file_name)) {
+            Log.e(log_label , "file_name empty!");
+            return "";
+        }
+
+        String[] strs = file_name.split("\\.");
+        if(strs.length < 1) {
+            Log.e(log_label , "file_name format illegal! file_name:" + file_name);
+            return "";
+        }
+
+        //get md5
+        String f_md5 = strs[0];
+        int hash_code = f_md5.hashCode();
+        hash_code = Math.abs(hash_code);
+        return String.format("gf_%02d" , (hash_code % GROUP_CHAT_DIR_HASH));
+    }
+
+    /*
     public static void CreateGroupFileDir(long grp_id) {
         String log_label = "CreateGroupFileDir";
         //group dir
@@ -469,7 +494,27 @@ public class AppConfig {
             Log.i(log_label , "create group dir:" + dir_path);
         }
         Log.d(log_label , "grp_id:" + grp_id + " group dir:" + dir_path);
+    }*/
+
+    public static void CreateGroupChatDirs() {
+        String log_label = "CreateGroupChatDirs";
+        String g_dir_name;
+        String dir_path;
+        File f_dir;
+        for(int i=0; i<GROUP_CHAT_DIR_HASH; i++) {
+            g_dir_name = String.format("gf_%02d" , i);
+            dir_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + g_dir_name;
+            f_dir = new File(dir_path);
+            if(!f_dir.exists()) {
+                f_dir.mkdirs();
+                Log.i(log_label , "create group dir:" + dir_path);
+            } else {
+                Log.d(log_label, " exist group dir:" + dir_path);
+            }
+        }
+
     }
+
 
 
     public static void DelTempMiscFile(String file_name) {
@@ -1202,7 +1247,7 @@ public class AppConfig {
                     Log.e(log_label , "chat main dir path null!");
                     break;
                 }
-                file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+                file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + ChatFileName2Dir(file_name) + "/" + file_name;
                 break;
             case LOCAL_IMG_GRP_HEAD:
                 if(AppConfig.GROUP_HEAD_DIR_PATH == null) {
@@ -1369,7 +1414,7 @@ public class AppConfig {
             Log.e(log_label , "chat main dir path null!");
             return "";
         }
-        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + ChatFileName2Dir(file_name) + "/" + file_name;
         //check
         if(file_path==null || file_path.length()<=0) {
             Log.e(log_label , "file path illegal! path:" + file_path);
@@ -1403,7 +1448,7 @@ public class AppConfig {
             Log.e(log_label , "chat main dir path null!");
             return false;
         }
-        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+        file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + ChatFileName2Dir(file_name) + "/" + file_name;
 
         //check
         if(file_path==null || file_path.length()<=0) {
@@ -1468,7 +1513,7 @@ public class AppConfig {
                     Log.e(log_label , "chat main dir path null!");
                     break;
                 }
-                file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + AppConfig.GrpId2FileDir(grp_id) + "/" + file_name;
+                file_path = AppConfig.CHAT_MAIN_DIR_PATH + "/" + ChatFileName2Dir(file_name) + "/" + file_name;
                 break;
             case LOCAL_IMG_GRP_HEAD:
                 if(AppConfig.GROUP_HEAD_DIR_PATH == null) {
@@ -1526,7 +1571,7 @@ public class AppConfig {
     public static final int URL_TYPE_GROUP_HEAD = 3; //prefix: g_head
 
     //get file_name from url
-    //1:2:5016:202011_61dab386f4b4a9a53a970866040c5fdc_.jpg --> 61dab386f4b4a9a53a970866040c5fdc_.jpg
+    //1:2:5016:202011_61dab386f4b4a9a53a970866040c5fdc_.jpg --> 61dab386f4b4a9a53a970866040c5fdc.jpg
     public static String Url2RealFileName(String server_url) {
         String log_label = "Url2RealFileName";
         //check arg

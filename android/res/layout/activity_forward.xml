@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ForwardActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_baobaobackgray"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_alignParentTop="true"
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:background="@color/bg_midnight_blue_lighter"
+            android:id="@+id/ll_forward_head"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:textColor="@color/bg_white"
+                    android:text="转发"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_below="@id/ll_forward_head"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ll_forward_groups"
+                android:orientation="vertical">
+
+
+
+            </LinearLayout>
+
+
+        </ScrollView>
+
+
+        <Button
+            android:layout_alignParentBottom="true"
+            android:id="@+id/btn_forward_done"
+            android:gravity="center"
+            android:textColor="@color/bg_white"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:onClick="onClick"
+            android:background="@drawable/select_blue_gray"
+            android:textSize="10sp"
+            android:text="完成" />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

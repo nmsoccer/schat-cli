@@ -31,6 +31,7 @@ public class AudioActivity extends AppCompatActivity implements  MediaRecorder.O
     //private total_seconds = 0;
     private MediaPlayer mPlayer;
     private TextView tv_title;
+    private int record_times = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +73,7 @@ public class AudioActivity extends AppCompatActivity implements  MediaRecorder.O
                 } else {
                     recording = false;
                     pb_seconds.setVisibility(View.GONE);
-                    btn_ok.setText("开始");
+                    btn_ok.setText("重新开始");
                     btn_ok.setBackground(getDrawable(R.drawable.select_blue_solid_rect));
                     stopRecord();
                 }
