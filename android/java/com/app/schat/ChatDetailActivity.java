@@ -1385,8 +1385,9 @@ public class ChatDetailActivity extends Activity {
         Log.d(log_label , "msg_id:" + chat.msg_id + " content:" + chat.content + " tmp_id:" + chat.tmp_id);
         //Insert
         chatList.add(chat);
-        chatListView.setSelection(chatList.size()-1);
         chatAdapter.notifyDataSetChanged();
+        chatListView.setSelection(chatList.size()-1);
+
     }
 
     private void clear_temp_sending_msg() {

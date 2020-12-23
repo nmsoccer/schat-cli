@@ -377,7 +377,7 @@ public class GroundActivity extends AppCompatActivity implements AdapterView.OnI
         Window win = progress_dialog.getWindow();
         win.setAttributes(lp);
 
-        // 只呈现1s
+        // 只呈现2s
         new Thread(new Runnable() {
 
             @Override
@@ -385,7 +385,7 @@ public class GroundActivity extends AppCompatActivity implements AdapterView.OnI
                 long startTime = System.currentTimeMillis();
                 int progress = 0;
 
-                while (System.currentTimeMillis() - startTime < 1000) {
+                while (System.currentTimeMillis() - startTime < 2000) {
                     try {
                         progress += 10;
                         progress_dialog.setProgress(progress);
