@@ -9,5 +9,5 @@
     android:text="xx"
     android:id="@+id/checkbox"
     android:gravity="center_vertical"
-    android:layout_height="60dp">
+    android:layout_height="80dp">
 </CheckBox>

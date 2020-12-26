@@ -135,6 +135,7 @@ public class UserInfo {
     public UserDetail detail;
     public AtomicBoolean lock;
     public static int MAX_CREATE_GROUP_COUNT = 10; //default
+    public long LastLogout;
 
     public UserInfo() {
         this.account_name = "";

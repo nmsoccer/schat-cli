@@ -1145,17 +1145,22 @@ public class ChatDetailActivity extends Activity {
             });
         }
 
-        ImageView iv_show_more = (ImageView)dialog.findViewById(R.id.iv_send_dialog_more);
+        final ImageView iv_show_more = (ImageView)dialog.findViewById(R.id.iv_send_dialog_more);
         iv_show_more.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v)
             {
                 LinearLayout ll_more_panel = (LinearLayout)dialog.findViewById(R.id.ll_send_dialog_more);
-                if(ll_more_panel.getVisibility() == View.GONE)
+                if(ll_more_panel.getVisibility() == View.GONE) {
                     ll_more_panel.setVisibility(View.VISIBLE);
-                else
+                    iv_show_more.setImageDrawable(null);
+                    iv_show_more.setBackgroundResource(R.drawable.minus);
+                } else {
                     ll_more_panel.setVisibility(View.GONE);
+                    iv_show_more.setImageDrawable(null);
+                    iv_show_more.setBackgroundResource(R.drawable.plus);
+                }
             }
         });
         //choose image and listener
@@ -1575,6 +1580,7 @@ public class ChatDetailActivity extends Activity {
 
 
             snd_ts = c.getLong(c.getColumnIndex("snd_time"));
+            chat.send_time = snd_ts;
             if(AppConfig.ChatTimeInSpan(snd_ts , last_display_ts) == false) {
                 chat.chatTime = AppConfig.ConverUnixTime2MinStr(snd_ts);
                 last_display_ts = snd_ts;
@@ -1720,6 +1726,7 @@ public class ChatDetailActivity extends Activity {
                 last_display_ts = snd_ts;
             }
 
+            chat.send_time = snd_ts;
             chat.userName = c.getString(c.getColumnIndex("snd_name"));
             chat.uid = c.getLong(c.getColumnIndex("snd_uid"));
             //get file_name
@@ -1794,6 +1801,7 @@ public class ChatDetailActivity extends Activity {
             }
 
             snd_ts = c.getLong(c.getColumnIndex("snd_time"));
+            chat.send_time = snd_ts;
             if(AppConfig.ChatTimeInSpan(snd_ts , last_display_ts) == false) {
                 chat.chatTime = AppConfig.ConverUnixTime2MinStr(snd_ts);
                 last_display_ts = snd_ts;
@@ -1847,9 +1855,10 @@ public class ChatDetailActivity extends Activity {
         Button bt_ok = (Button)root_v.findViewById(R.id.bt_normal_dialog_ok); //del
         bt_ok.setText("删除");
 
-        //recall
+        //cancel
         Button bt_mid = (Button)root_v.findViewById(R.id.bt_normal_dialog_mid);
-        if(AppConfig.UserUid == entity.uid && entity.chat_flag == ChatInfo.CHAT_FLAG_NORMAL) {
+        //if(AppConfig.UserUid == entity.uid && entity.chat_flag == ChatInfo.CHAT_FLAG_NORMAL) {
+        if(cancel_allowed(entity)) {
             bt_mid.setText("撤回");
             bt_mid.setVisibility(View.VISIBLE);
         }
@@ -1915,16 +1924,32 @@ public class ChatDetailActivity extends Activity {
 
     }
 
+    private boolean cancel_allowed(ChatEntity entity) {
+        String log_label = "cancel_allowed";
+        long curr_ts = AppConfig.CurrentUnixTime();
+        if(AppConfig.UserUid != entity.uid)
+            return false;
+        if(entity.chat_flag != ChatInfo.CHAT_FLAG_NORMAL)
+            return false;
+        if(AppConfig.MAX_CANCEL_MSG_SECONDS > 0 && (curr_ts - entity.send_time)>AppConfig.MAX_CANCEL_MSG_SECONDS) {
+            Log.d(log_label , "cancel timeout! curr_ts:" + curr_ts + " send_ts:" + entity.send_time + " cancel_seconds:" + AppConfig.MAX_CANCEL_MSG_SECONDS);
+            return false;
+        }
+
+        return true;
+    }
+
+
     private boolean copy_allowed(ChatEntity entity) {
         String log_lable = "copy_allowed";
         //filt
         if(entity.chat_type != CSProto.CHAT_MSG_TYPE_TEXT) {
-            Log.e(log_label , "chat type illegal! type:" + entity.chat_type);
+            Log.d(log_label , "chat type illegal! type:" + entity.chat_type);
             return false;
         }
 
         if(entity.chat_flag != ChatInfo.CHAT_FLAG_NORMAL) {
-            Log.e(log_label , "flag illegal! flag:" + entity.chat_flag);
+            Log.d(log_label , "flag illegal! flag:" + entity.chat_flag);
             return false;
         }
 
@@ -1940,12 +1965,12 @@ public class ChatDetailActivity extends Activity {
         String log_label = "direct_allowed";
         //filt
         if(entity.chat_type <= CSProto.CHAT_MSG_TYPE_TEXT || entity.chat_type >= CSProto.CHAT_MSG_TYPE_VOICE) {
-            Log.e(log_label , "chat type illegal! type:" + entity.chat_type);
+            Log.d(log_label , "chat type illegal! type:" + entity.chat_type);
             return false;
         }
 
         if(entity.chat_flag != ChatInfo.CHAT_FLAG_NORMAL) {
-            Log.e(log_label , "flag illegal! flag:" + entity.chat_flag);
+            Log.d(log_label , "flag illegal! flag:" + entity.chat_flag);
             return false;
         }
 

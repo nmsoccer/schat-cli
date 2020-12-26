@@ -42,9 +42,9 @@
 	</FrameLayout>
 
 
-    <LinearLayout 
+    <FrameLayout
         android:layout_width="fill_parent"
-        android:layout_height="30dp"
+        android:layout_height="35dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">       
 
@@ -56,11 +56,19 @@
 		    android:textColor="@color/bg_midnight_blue"
 		    android:text="发送"
 		    android:background="@drawable/select_send_button"/>
-	</LinearLayout>
+
+		<ImageView
+			android:layout_width="25dp"
+			android:layout_height="25dp"
+			android:layout_marginRight="2dp"
+			android:id="@+id/iv_send_dialog_more"
+			android:layout_gravity="right|center_vertical"
+			android:background="@drawable/plus"/>
+	</FrameLayout>
 
 	<ImageView
 		android:layout_marginTop="10dp"
-		android:id="@+id/iv_send_dialog_more"
+        android:visibility="gone"
 		android:layout_width="25dp"
 		android:layout_height="25dp"
 		android:layout_gravity="center_horizontal"
@@ -71,10 +79,11 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
-
+		android:visibility="gone"
 		android:id="@+id/ll_send_dialog_more">
 
 		<ImageView
+			android:visibility="gone"
 			android:layout_width="match_parent"
 			android:layout_height="1dp"
 			android:layout_marginTop="5dp"
@@ -84,7 +93,7 @@
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="30dp"
-			android:layout_marginTop="5dp"
+			android:layout_marginTop="8dp"
 			android:orientation="horizontal">
 
 			<ImageView
@@ -98,7 +107,7 @@
 				android:layout_height="match_parent"
 				android:layout_marginLeft="5dp"
 				android:layout_marginRight="5dp"
-				android:background="@color/bg_silver"/>
+				android:background="@color/bg_midnight_blue"/>
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_pic"
@@ -112,7 +121,7 @@
 				android:layout_height="match_parent"
 				android:layout_marginLeft="5dp"
 				android:layout_marginRight="5dp"
-				android:background="@color/bg_silver"/>
+				android:background="@color/bg_midnight_blue"/>
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_video"
@@ -126,7 +135,7 @@
 				android:layout_height="match_parent"
 				android:layout_marginLeft="5dp"
 				android:layout_marginRight="5dp"
-				android:background="@color/bg_silver"/>
+				android:background="@color/bg_midnight_blue"/>
 
 			<ImageView
 				android:id="@+id/iv_send_dialog_choose_voice"
@@ -136,11 +145,12 @@
 				android:background="@drawable/select_send_chat_voice" />
 
 			<TextView
+				android:visibility="gone"
 				android:layout_width="1dp"
 				android:layout_height="match_parent"
 				android:layout_marginLeft="5dp"
 				android:layout_marginRight="5dp"
-				android:background="@color/bg_silver"/>
+				android:background="@color/bg_midnight_blue"/>
 
 		</LinearLayout>
 

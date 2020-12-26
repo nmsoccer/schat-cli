@@ -675,6 +675,7 @@ public class CSProto {
             //Level0 UserInfo
             UserInfo user_info = new UserInfo();
             user_info.account_name = sub.getString("name");
+            user_info.LastLogout = sub.getLong("last_logout");
 
             //Level1 Basic
             JSONObject o_basic = sub.getJSONObject("basic");
@@ -1019,6 +1020,12 @@ public class CSProto {
                     Log.d(log_label , "upload_img_size " + AppConfig.MAX_IMG_SIZE + " --> " + v);
                     if(v > 0)
                         AppConfig.MAX_IMG_SIZE = v;
+                    break;
+                case "cancel_secs":
+                    v = Integer.parseInt(value);
+                    Log.d(log_label , "cancel seconds " + AppConfig.MAX_CANCEL_MSG_SECONDS + " --> " + v);
+                    if(v > 0)
+                        AppConfig.MAX_CANCEL_MSG_SECONDS = v;
                     break;
                 default:
                     Log.e(log_label , "unkown option:" + name);

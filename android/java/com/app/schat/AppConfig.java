@@ -111,6 +111,7 @@ public class AppConfig {
             AppConfig.PrintInfo(context , "图片大小超过" + AppConfig.MAX_IMG_SIZE/1024/1024 + "M , 上传时将进行压缩");
         }
     }
+    public static int MAX_CANCEL_MSG_SECONDS = 0; //default all msg can be cancelled
     public static final int CHAT_IMG_STANDARD_SIZE = 150; //dp
     public static final int CHAT_IMG_COMPRESS_SIZE = (40 * 1024);
     public static final int USER_HEAD_STANDARD_SIZE = 60; //dp

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private String user_name;
     private boolean main_act_runs = true;
-
+    private TextView tv_head_last_login;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -51,28 +52,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
 
         //test generate
-        /*
-        Map<String,String> map = RSAUtil.generateKeyPair("schat");
-        String pub_key = map.get("publicKey").toString();
-        String priv_key = map.get("privateKey").toString();
-        Log.i("rsa" , "pub_key:" + pub_key);
-        Log.i("rsa" , "pri_key:" + priv_key);*/
-        /*
-        String pub_key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDtbxEfSCe57lCt8Jts+2BOlk/qER8J4wYKB1pLuIBJoFMz143E03W8kI/foh27svub8mMp77nKi8MDbVQRV1LXtHQYRTjoc6Srn3hGKaxaLxTE5w8G/SooYfVp8qdH3xV7BIKUnkU9Bb+L1z+7REWc15GApkx1uYWarBuSfdHkhwIDAQAB";
-        String priv_key = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAO1vER9IJ7nuUK3wm2z7YE6WT+oRHwnjBgoHWku4gEmgUzPXjcTTdbyQj9+iHbuy+5vyYynvucqLwwNtVBFXUte0dBhFOOhzpKufeEYprFovFMTnDwb9Kihh9Wnyp0ffFXsEgpSeRT0Fv4vXP7tERZzXkYCmTHW5hZqsG5J90eSHAgMBAAECgYASfjqerZ+Of03gZmOstt2W8WUzDXdV7U1Mnar+R9YSJf8lBA6CPJgogjf6iqV3N6caS+RGYWoeqQkc7LiGCz+j7/vNz9KW50jCFJIdbwrdFm4oFuyjgoUnMUyBryTGI8CWPjvoUEfICueCi6874uUgLZ2TzwmoyXpKd6uSbV9YCQJBAPum0PapjtBOMFAekSWKK6Ka716d6MzCb8oSw0lkBLTIciCLAvJcrdtyRYXaLg4xhGNLib5TqLY+zLy3HWI7wPkCQQDxiVuv70d9SiBElUMdC0fvlrh3R0trBkPxS8uQvZfyEcFodeyWXQu1Pq7ZhRGHxnTyd7GdmSuKyGyxU9oxCbF/AkAlrDRuKLYDgyECbYEHIKcloZIiFPur45O+qY5opzt5IOTM8GKRi8RPLM0xm5b3cvxBrSZCwt1n4wDdY4BXm2BpAkEAgrATkAoj4EKvWux4N8rWzWf7v24v/GSTdofQSSyMfknlICROMr19jD+yU7eQWKqktFzXGbK6wIjZZsk8EbRw+QJBALd35CNVce+TXOZOHQQ6MyRa3vT/WOWTDiA0LkbKJM37CTWyCYkzj8RvjmLztrmW0vgytMEqSELGk8qFZqKYaL4=";
-        String text_data = "12345678";
-        //encrypt
-        try {
-            String enc_data = RSAUtil.encrypt(RSAUtil.getPublicKey(pub_key) , text_data);
-            Log.i("rsa" , "enc_data:" + enc_data);
-
-            String recover_data = RSAUtil.decrypt(RSAUtil.getPrivateKey(priv_key) , enc_data);
-            Log.i("rsa" , "recover_data:" + recover_data);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
+        tv_head_last_login = this.findViewById(R.id.tv_main_head_last_login);
 
         //create dir
         //create_file_dir();
@@ -103,6 +83,10 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onResume();
         Log.d("main.on_resume" , "done");
+        if(AppConfig.IsLogin()) {
+            String last_login = AppConfig.ConverUnixTime2MinStr(AppConfig.user_info.LastLogout);
+            tv_head_last_login.setText("上次使用:\n" + last_login);
+        }
     }
 
     @Override

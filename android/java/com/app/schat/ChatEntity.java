@@ -7,6 +7,7 @@ public class ChatEntity
 	public int userImage;
     public String content;
     public String chatTime;
+    public long send_time;
     public String userName;
     private boolean isComeMsg;
     public long uid;
