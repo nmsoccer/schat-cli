@@ -15,8 +15,8 @@ version = 0.0.4
 dir_query_key = c_sssakb
 #validate digest count if 0 no check
 validate_digest = 2
-pub_sha2_0 = b7718bd3d0612098a6290a0d503f3bb92cce39af1399f7fee48526095c996d46
-pub_sha2_1 = a980b616ef3e781e3888d871835a1f710c0356915b48214d0a77d3377f2b765c
+pub_sha2_0 = aaaa
+pub_sha2_1 = bbbb
 #https server self-signed cert
 self_signed_cert_open = 1
 bks_file = key.bks
