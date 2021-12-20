@@ -6,6 +6,7 @@ schat client
 
 ### 平台
 * **Android**  目前只提供了android版本. 对应的apk文件下载:https://github.com/nmsoccer/schat-cli/releases 版本1.5
+* 当前只支持android版本。可以直连公网测试主机119.29.135.45:11802进行简单体验。该地址仅做功能验证使用，会定期清除服务器数据，个人服务器请根据说明自行搭建
 
 ### 配置
 src/asset/config文件进行了基本的配置。在编译配置时需要注意一些修改，基本内容如下：
